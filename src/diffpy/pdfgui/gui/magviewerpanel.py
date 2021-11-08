@@ -20,16 +20,19 @@ mpl.rcParams["toolbar"] = "toolmanager"
 
 class CanvasFrame(wx.Frame):
 
-    def __init__(self, X, elems, revdmap, magconfigure, nonmag=None, cif="", basis=np.eye(3), size=(900, 700)):
+    def __init__(self, X, elems, revdmap, magconfigure, nonmag=None, cif="", basis=np.eye(3), size=(900, 700), **kwds):
         if len(X) == 0:
             wx.MessageBox("No atoms inside of the structure are magnetic!",
                           "Error", wx.OK | wx.ICON_INFORMATION)
             magconfigure.firstViewerLaunch = True
             magconfigure.magviewOpen = False
             return
+        # begin wxGlade: CanvasFrame.__init__
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, parent=magconfigure, size=(900, 700))
         self.panel = CanvasPanel(self, X, elems, revdmap,
                                  magconfigure, nonmag, cif, basis)
+        self.SetTitle("frame")
         self.parent = magconfigure
         self.parent.magviewOpen = True
         self.parent.phaseGridAtoms.EnableEditing(False)
@@ -40,19 +43,11 @@ class CanvasFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.onClose)
         magconfigure.firstViewerLaunch = False
         self.SetFocus()
-        #self.MakeModal(True)
         #self.parent.phaseConfig.gridAtoms.EnableEditing(False)
-
-    def MakeModal(self, modal=True):
-        if modal and not hasattr(self, '_disabler'):
-            self._disabler = wx.WindowDisabler(self)
-        if not modal and hasattr(self, '_disabler'):
-            del self._disabler
 
     def onClose(self, event):
         self.parent.phaseGridAtoms.EnableEditing(True)
         self.parent.editAtoms = True
-        self.MakeModal(False)
         self.panel.on_close(event)
         self.Destroy()
 
@@ -107,11 +102,11 @@ class CanvasPanel(wx.Panel):
         """
         wx.Panel.__init__(self, parent)
 
-        self.btnInfo = wx.Button(self, wx.ID_ANY, "Information")
-        self.btnInfo.Bind(wx.EVT_BUTTON, self.onInstructions)
+        #self.btnInfo = wx.Button(self, wx.ID_ANY, "Information")
+        #self.btnInfo.Bind(wx.EVT_BUTTON, self.onInstructions)
 
-        self.btn1 = wx.Button(self, wx.ID_ANY, "Done")
-        self.btn1.Bind(wx.EVT_BUTTON, self.destroy)
+        #self.btn1 = wx.Button(self, wx.ID_ANY, "Done")
+        #self.btn1.Bind(wx.EVT_BUTTON, self.destroy)
 
         self.magconfigure = magconfigure
         if X is None:
@@ -183,6 +178,9 @@ class CanvasPanel(wx.Panel):
         self.canvas = FigureCanvas(self, -1, self.fig)
         self.__do_layout()
 
+        self.btnInfo.Bind(wx.EVT_BUTTON, self.onInstructions)
+        self.btn1.Bind(wx.EVT_BUTTON, self.destroy)
+
         #sets the default grid scale
         self.xtickDefault = self.ax.get_xticks()
         self.ytickDefault = self.ax.get_yticks()
@@ -200,15 +198,16 @@ class CanvasPanel(wx.Panel):
         self.toolbar.update()
         sizerMain = wx.BoxSizer(wx.VERTICAL)
         sizerMain.Add(self.toolbar, 0, wx.LEFT | wx.TOP)
-        #sizerCanvas = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, ""), wx.VERTICAL)
         sizerMain.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
-        sizer_4 = wx.StaticBoxSizer(wx.StaticBox(
-            self, wx.ID_ANY, ""), wx.HORIZONTAL)
-        sizer_4.Add(2, 1, 1)
-        sizer_4.Add(self.btnInfo, 0, wx.ALL | wx.ALIGN_RIGHT, 10)
-        sizer_4.Add(self.btn1, 0, wx.ALL | wx.ALIGN_RIGHT, 10)
-        #sizerMain.Add(sizerCanvas, 5, wx.EXPAND | wx.ALL, 20)
-        sizerMain.Add(sizer_4, 0, wx.EXPAND, 0)
+        sizer_4 = wx.BoxSizer(wx.HORIZONTAL)
+        sizerMain.Add(sizer_4, 0, wx.ALIGN_RIGHT, 0)
+
+        self.btnInfo = wx.Button(self, wx.ID_ANY, "Information")
+        sizer_4.Add(self.btnInfo, 0, wx.LEFT | wx.RIGHT, 5)
+
+        self.btn1 = wx.Button(self, wx.ID_ANY, "Done")
+        sizer_4.Add(self.btn1, 0, wx.RIGHT, 5)
+
         self.SetSizer(sizerMain)
         sizerMain.Fit(self)
         self.Layout()

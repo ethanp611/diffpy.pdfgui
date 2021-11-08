@@ -27,16 +27,46 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
         # begin wxGlade: FitNotebookPanel.__init__
         kwds["style"] = kwds.get("style", 0) | wx.TAB_TRAVERSAL
         wx.Panel.__init__(self, *args, **kwds)
-        self.labelPanelName = wx.StaticText(self, wx.ID_ANY, "Fitting Options")
-        self.enableMag = wx.CheckBox(self, wx.ID_ANY, "Enable Magnetic PDF")
-        self.mpdfType = wx.RadioBox(self, wx.ID_ANY, label="Magnetic Fitting Type", choices=["Normalized", "Unnormalized"], style=wx.RA_SPECIFY_ROWS)
-        self.fitProtocol = wx.RadioBox(self, wx.ID_ANY, label="Fitting Protocol", choices=["Syncronous", "Asyncronous"], style=wx.RA_SPECIFY_ROWS)
-        self.fitnotebook = wx.Notebook(self, wx.ID_ANY, style=0)
-        self.parametersPanel = ParametersPanel(self.fitnotebook, wx.ID_ANY)
-        self.resultsPanel = ResultsPanel(self.fitnotebook, wx.ID_ANY)
 
-        self.__set_properties()
-        self.__do_layout()
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+
+        sizer_2 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, ""), wx.HORIZONTAL)
+        mainSizer.Add(sizer_2, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+
+        labelPanelName = wx.StaticText(self, wx.ID_ANY, "Fitting Options")
+        labelPanelName.SetFont(wx.Font(18, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
+        sizer_2.Add(labelPanelName, 0, wx.ALL, 0)
+
+        grid_sizer_2 = wx.FlexGridSizer(1, 3, 0, 27)
+        mainSizer.Add(grid_sizer_2, 0, wx.BOTTOM | wx.TOP, 15)
+
+        self.enableMag = wx.CheckBox(self, wx.ID_ANY, "Enable Magnetic PDF")
+        grid_sizer_2.Add(self.enableMag, 0, wx.ALIGN_CENTER | wx.LEFT, 4)
+
+        self.mpdfType = wx.RadioBox(self, wx.ID_ANY, "Magnetic Fitting Type", choices=["Normalized", "Unnormalized"], majorDimension=1, style=wx.RA_SPECIFY_COLS)
+        self.mpdfType.SetSelection(0)
+        grid_sizer_2.Add(self.mpdfType, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT, 0)
+
+        self.fitProtocol = wx.RadioBox(self, wx.ID_ANY, "Fitting Protocol", choices=["Syncronous", "Asyncronous"], majorDimension=1, style=wx.RA_SPECIFY_COLS)
+        self.fitProtocol.SetSelection(0)
+        grid_sizer_2.Add(self.fitProtocol, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT | wx.RIGHT, 5)
+
+        self.fitnotebook = wx.Notebook(self, wx.ID_ANY, style=0)
+        mainSizer.Add(self.fitnotebook, 0, wx.EXPAND, 0)
+
+        self.parametersPanel = ParametersPanel(self.fitnotebook, wx.ID_ANY)
+        self.fitnotebook.AddPage(self.parametersPanel, "Parameters")
+
+        self.resultsPanel = ResultsPanel(self.fitnotebook, wx.ID_ANY)
+        self.fitnotebook.AddPage(self.resultsPanel, "Results")
+
+        grid_sizer_2.AddGrowableCol(1)
+        grid_sizer_2.AddGrowableCol(2)
+
+        self.SetSizer(mainSizer)
+        mainSizer.Fit(self)
+
+        self.Layout()
 
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.onPageChanged, self.fitnotebook)
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.onPageChanging, self.fitnotebook)
@@ -44,38 +74,6 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
         # end wxGlade
         self.__customProperties()
 
-    def __set_properties(self):
-        # begin wxGlade: FitNotebookPanel.__set_properties
-        self.labelPanelName.SetFont(wx.Font(18, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
-        self.mpdfType.Disable()
-        self.fitProtocol.Disable()
-        pass
-        # end wxGlade
-
-    def __do_layout(self):
-        # begin wxGlade: FitNotebookPanel.__do_layout
-        sizerMain = wx.BoxSizer(wx.VERTICAL)
-        sizer_1 = wx.BoxSizer(wx.VERTICAL)
-        sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
-        sizerPanelName = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, ""), wx.HORIZONTAL)
-        sizerPanelName.Add(self.labelPanelName, 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT, 5)
-        sizerMain.Add(sizerPanelName, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
-        magOptionSizer = wx.FlexGridSizer(2, 6, 0, 0)
-        magOptionSizer.Add(self.enableMag, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT | wx.ALL, 15)
-        magOptionSizer.Add(self.mpdfType, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT | wx.ALL, 15)
-        magOptionSizer.Add(self.fitProtocol, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT | wx.ALL, 15)
-        #magOptionSizer.Add(50, 50, 0, 15)
-        #sizer_1.Add(sizer_2)
-        sizer_2.Add(magOptionSizer, wx.EXPAND, 0)
-        self.fitnotebook.AddPage(self.parametersPanel, "Parameters")
-        self.fitnotebook.AddPage(self.resultsPanel, "Results")
-        sizer_1.Add(self.fitnotebook, 1, wx.EXPAND, 0)
-        sizerMain.Add(sizer_2, 0, wx.EXPAND, 0)
-        sizerMain.Add(sizer_1, 0, wx.EXPAND, 0)
-        self.SetSizer(sizerMain)
-        sizerMain.Fit(self)
-        self.Layout()
-        # end wxGlade
 
     def __customProperties(self):
         """Set the custom properties."""
