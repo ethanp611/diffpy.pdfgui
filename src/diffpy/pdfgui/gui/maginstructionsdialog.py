@@ -33,49 +33,43 @@ R/L Arrows: Change vector length"""
 
 
 class DialogInstructions(wx.Dialog):
-    '''"Instructions" Dialog: Shows instructions for magviewer'''
-
     def __init__(self, *args, **kwds):
-
+        # begin wxGlade: MyDialog.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
-        self.SetSize((600, 595))
-        self.label_instructions = wx.StaticText(self, wx.ID_ANY, "")
-        self.button_OK = wx.Button(self, wx.ID_OK, "OK")
-        self.Bind(wx.EVT_CHAR_HOOK, self.onPressI)
+        self.SetSize((280, 300))
+        self.SetTitle("Instructions")
 
-        self.__set_properties()
-        self.__do_layout()
+        sizer_1 = wx.BoxSizer(wx.VERTICAL)
 
+        sizer_3 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_1.Add(sizer_3, 0, wx.EXPAND, 0)
+
+        label_instructions = wx.StaticText(self, wx.ID_ANY, "")
+        label_instructions.SetLabel(_instructions)
+        sizer_3.Add(label_instructions, 0, 0, 0)
+
+        sizer_2 = wx.StdDialogButtonSizer()
+        sizer_1.Add(sizer_2, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 0)
+
+        self.button_OK = wx.Button(self, wx.ID_OK, "")
+        self.button_OK.SetDefault()
+        sizer_2.AddButton(self.button_OK)
+
+        sizer_2.Realize()
+
+        self.SetSizer(sizer_1)
+
+        self.SetAffirmativeId(self.button_OK.GetId())
+
+        self.Layout()
         # end wxGlade
-        self.label_instructions.SetLabel(_instructions)
-
-        self.Fit()
-        return
+        self.Bind(wx.EVT_CHAR_HOOK, self.onPressI)
 
     def onPressI(self, event):
         if event.GetKeyCode() == 73:  # Detects if "i" was pressed
             self.Destroy()
             return
-
-    def __set_properties(self):
-        self.SetTitle("Instructions")
-        self.SetSize((600, 595))
-
-    def __do_layout(self):
-        sizer_main = wx.BoxSizer(wx.VERTICAL)
-        sizer_instructions = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_instructions.Add(self.label_instructions, 0, wx.RIGHT, 10)
-        sizer_main.Add(sizer_instructions, 0, wx.EXPAND, 0)
-        sizer_button.Add((20, 20), 1, wx.EXPAND, 0)
-        sizer_button.Add(self.button_OK, 0, wx.RIGHT, 10)
-        sizer_button.Add(0, 0, 1)
-        sizer_main.Add(sizer_button, 0, wx.EXPAND, 0)
-        self.SetSizer(sizer_main)
-        self.Layout()
-        self.Centre()
-        # end wxGlade
 
 # end of class DialogInstructions
 
