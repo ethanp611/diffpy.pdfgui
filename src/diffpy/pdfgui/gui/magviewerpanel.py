@@ -32,7 +32,7 @@ class CanvasFrame(wx.Frame):
         wx.Frame.__init__(self, parent=magconfigure, size=(900, 700))
         self.panel = CanvasPanel(self, X, elems, revdmap,
                                  magconfigure, nonmag, cif, basis)
-        self.SetTitle("frame")
+        self.SetTitle("MagViewer")
         self.parent = magconfigure
         self.parent.magviewOpen = True
         self.parent.phaseGridAtoms.EnableEditing(False)

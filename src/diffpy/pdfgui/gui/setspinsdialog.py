@@ -23,92 +23,56 @@ class DialogSetSpins(wx.Dialog):
     '''"Mag Viewer Set Spins" Dialog: '''
 
     def __init__(self, *args, **kwds):
-
+        # begin wxGlade: DialogSetSpins.__init__
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
-        self.parent = args[0]
-        self.SetSize((600, 595))
-        self.labelSpinVector = wx.StaticText(
-            self, wx.ID_ANY, "Spin Vector\nFormat: a,b,c\n")
-        self.textCtrlSpinVector = wx.TextCtrl(
-            self, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
-        self.checkboxCrystalCoords = wx.CheckBox(
-            self, label='Crystallographic Coordinates (a, b, c)')
-        self.labelMagnitude = wx.StaticText(
-            self, wx.ID_ANY, "Magnitude\n(Optional: will default to unit length)\n")
-        self.textCtrlMagnitude = wx.TextCtrl(
-            self, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
-        self.labelPropVec = wx.StaticText(
-            self, wx.ID_ANY, "Propagation Vector\nFormat: k1,k2,k3\n(Optional: will default to (0, 0, 0))")
-        self.textCtrlPropVec = wx.TextCtrl(
-            self, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
-        self.labelMultProps = wx.StaticText(
-            self, wx.ID_ANY, "For Multiple Propagation Vectors:\ninsert in tuples of 3, delimited by commas:\nEx: (0,0.5,0.5), (1,0,0.5), ...")
-        self.buttonSetSpin = wx.Button(self, wx.ID_ANY, "Set Spin")
-        self.buttonBack = wx.Button(self, wx.ID_OK, "Go Back")
-
-        self.__set_properties()
-        self.__do_layout()
-
-        self.buttonSetSpin.Bind(wx.EVT_BUTTON, self.onSetSpin)
-        self.checkboxCrystalCoords.Bind(
-            wx.EVT_CHECKBOX, self.onCheckCrystalCoords)
-
-        # end wxGlade
-        self.__customProperties()
-
-        return
-
-    def __set_properties(self):
+        self.SetSize((290, 410))
         self.SetTitle("Set Spins")
-        self.SetSize((600, 595))
-
-    def __do_layout(self):
-        '''
-        sizer_main = wx.BoxSizer(wx.VERTICAL)
-        sizer_spin = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, ""), wx.VERTICAL)
-        sizer_spin.Add(1,8,1)
-        sizer_spin.Add(self.labelSpinVector, 0, wx.RIGHT, 10)
-        sizer_spin.Add(self.textCtrlSpinVector, 0, wx.RIGHT, 10)
-        sizer_spin.Add(self.checkboxCrystalCoords, 0, wx.RIGHT, 10)
-        sizer_spin.Add(self.labelMagnitude, 0, wx.RIGHT, 10)
-        sizer_spin.Add(self.textCtrlMagnitude, 0, wx.RIGHT, 10)
-        sizer_spin.Add(self.labelPropVec, 0, wx.RIGHT, 10)
-        sizer_spin.Add(self.textCtrlPropVec, 0, wx.RIGHT, 10)
-        sizer_spin.Add(self.labelMultProps, 0, wx.RIGHT, 10)
-        sizer_main.Add(sizer_spin, 0, wx.EXPAND, 0)
-
-        sizer_buttons = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_buttons.Add((20, 20), 5, wx.EXPAND, 0)
-        sizer_buttons.Add(self.buttonSetSpin, 0, wx.RIGHT, 10)
-        sizer_buttons.Add(self.buttonBack, 0, wx.RIGHT, 10)
-        sizer_buttons.Add(0, 0, 1)
-        sizer_main.Add(sizer_buttons, 0, wx.EXPAND, 0)
-        '''
 
         sizer_main = wx.FlexGridSizer(10, 1, 4, 4)
-        sizer_main.SetFlexibleDirection(wx.VERTICAL)
-        sizer_main.Add(self.labelSpinVector, 0, 0, 0)
+
+        self.labelSpinVector = wx.StaticText(self, wx.ID_ANY, "Spin Vector\nFormat: a,b,c")
+        sizer_main.Add(self.labelSpinVector, 0, wx.BOTTOM | wx.EXPAND, 20)
+
+        self.textCtrlSpinVector = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
         sizer_main.Add(self.textCtrlSpinVector, 0, 0, 0)
+
+        self.checkboxCrystalCoords = wx.CheckBox(self, wx.ID_ANY, "Crystallographic Coordinates (a, b, c)")
         sizer_main.Add(self.checkboxCrystalCoords, 0, 0, 0)
-        sizer_main.Add(self.labelMagnitude, 0, 0, 0)
+
+        self.labelMagnitude = wx.StaticText(self, wx.ID_ANY, "Magnitude\n(Optional: will default to unit length)")
+        sizer_main.Add(self.labelMagnitude, 0, wx.BOTTOM, 20)
+
+        self.textCtrlMagnitude = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
         sizer_main.Add(self.textCtrlMagnitude, 0, 0, 0)
+
+        self.labelPropVec = wx.StaticText(self, wx.ID_ANY, "Propagation Vector\nFormat: k1,k2,k3\n(Optional: will default to (0, 0, 0))")
         sizer_main.Add(self.labelPropVec, 0, 0, 0)
+
+        self.textCtrlPropVec = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_PROCESS_ENTER)
         sizer_main.Add(self.textCtrlPropVec, 0, 0, 0)
+
+        self.labelMultProps = wx.StaticText(self, wx.ID_ANY, "For Multiple Propagation Vectors:\ninsert in tuples of 3, delimited by commas:\nEx: (0,0.5,0.5), (1,0,0.5), ...")
         sizer_main.Add(self.labelMultProps, 0, 0, 0)
 
         sizer_buttons = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_buttons.Add((20, 20), 1, wx.EXPAND, 0)
-        sizer_buttons.Add(self.buttonSetSpin, 0, wx.RIGHT, 10)
-        sizer_buttons.Add(self.buttonBack, 0, wx.RIGHT, 10)
-        sizer_buttons.Add(20, 2, 1)
-        sizer_main.Add(sizer_buttons, 0, wx.EXPAND, 0)
+        sizer_main.Add(sizer_buttons, 1, wx.ALIGN_CENTER, 0)
+
+        self.buttonSetSpin = wx.Button(self, wx.ID_ANY, "Set Spin")
+        sizer_buttons.Add(self.buttonSetSpin, 0, 0, 0)
+
+        self.buttonBack = wx.Button(self, wx.ID_OK, "Go Back")
+        sizer_buttons.Add(self.buttonBack, 0, wx.ALIGN_CENTER_VERTICAL, 0)
 
         self.SetSizer(sizer_main)
-        self.Fit()
+
         self.Layout()
-        self.Centre()
+
+        self.Bind(wx.EVT_CHECKBOX, self.onCheckCrystalCoords, self.checkboxCrystalCoords)
+        self.Bind(wx.EVT_BUTTON, self.onSetSpin, self.buttonSetSpin)
         # end wxGlade
+        self.parent = args[0]
+        self.__customProperties()
 
     def __customProperties(self):
         self.multiple_props = re.compile(
