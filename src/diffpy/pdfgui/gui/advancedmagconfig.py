@@ -22,65 +22,64 @@ import numpy as np
 
 
 class AdvancedFrame(wx.Frame):
-
-    def __init__(self, title, mags, struc):
-        wx.Frame.__init__(self, parent=None, title="Advanced Configuration Settings", size=(800,600))
-        structure = struc
-        self.magnetic_atoms = mags
-        panel = AdvancedPanel(self, mags = self.magnetic_atoms, struc = structure)
-
-        self.Show()
-
-class AdvancedPanel(wx.Panel):
-    def __init__(self, parent, mags, struc):
-        wx.Panel.__init__(self,parent)
+    def __init__(self, title, mags, struc, *args, **kwds):
         self.structure = struc
-        self.gridAtoms = AutoWidthLabelsGrid(self, wx.ID_ANY, size=(1,1))
-        self.btn1 = wx.Button(self, wx.ID_ANY, "Ok")
-        self.btn2 = wx.Button(self, wx.ID_ANY, "Cancel")
+        self.magnetic_atoms = mags
+        # begin wxGlade: MyFrame.__init__
+        #kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
+        wx.Frame.__init__(self, parent=None, title="Advanced Configuration Settings", size=(800,600))
+        self.SetSize((800, 630))
+        self.SetTitle("Advnaced Configuration Settings")
 
-        self.btn1.Bind(wx.EVT_BUTTON, self.destroy)
-        self.btn2.Bind(wx.EVT_BUTTON, self.destroy)
-        #colFiveName = ("ξ{}".format("\N{U+0078,U+0031}") + "ξ{}".format("\N{U+0079,U+0032}") + "ξ{}".format("\N{U+007A}"))
+        self.panel_1 = wx.Panel(self, wx.ID_ANY)
+        self.panel_1.SetMinSize((800, 600))
 
-        self.__set_properties()
-        self.__do_layout()
-        self.refresh()
+        sizer_1 = wx.StaticBoxSizer(wx.StaticBox(self.panel_1, wx.ID_ANY, ""), wx.VERTICAL)
 
+        sizer_2 = wx.StaticBoxSizer(wx.StaticBox(self.panel_1, wx.ID_ANY, ""), wx.HORIZONTAL)
+        sizer_1.Add(sizer_2, 0, wx.EXPAND, 0)
 
-    def __set_properties(self):
-        self.gridAtoms.CreateGrid(5, 7)
+        self.gridAtoms = AutoWidthLabelsGrid(self.panel_1, wx.ID_ANY, size=(1, 1))
+        self.gridAtoms.CreateGrid(0, 7)
         self.gridAtoms.EnableDragRowSize(0)
+        self.gridAtoms.SetRowLabelSize(23)
         self.gridAtoms.SetColLabelValue(0, "elem(x,y,z)")
-        self.gridAtoms.SetColLabelValue(1, " g\u209B ")
-        self.gridAtoms.SetColLabelValue(2, " g\u2097 ")
+        self.gridAtoms.SetColSize(0, 225)
+        self.gridAtoms.SetColLabelValue(1, "gs")
+        self.gridAtoms.SetColSize(1, 29)
+        self.gridAtoms.SetColLabelValue(2, "gi")
+        self.gridAtoms.SetColSize(2, 31)
         self.gridAtoms.SetColLabelValue(3, "Q grid(min,max,step)")
+        self.gridAtoms.SetColSize(3, 152)
         self.gridAtoms.SetColLabelValue(4, "custom FF")
         self.gridAtoms.SetColLabelValue(5, "colFiveName")
+        self.gridAtoms.SetColSize(5, 93)
         self.gridAtoms.SetColLabelValue(6, "damping pwr")
+        self.gridAtoms.SetColSize(6, 97)
+        self.gridAtoms.SetMinSize((796, 460))
+        sizer_2.Add(self.gridAtoms, 1, wx.EXPAND, 0)
 
+        sizer_3 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_1.Add(sizer_3, 1, wx.ALIGN_RIGHT | wx.ALL, 33)
 
-    def __do_layout(self):
-        sizerMain = wx.BoxSizer(wx.VERTICAL)
-        sizerAtoms = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, ""), wx.VERTICAL)
-        sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_4 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, ""), wx.HORIZONTAL)
-        sizerAtoms.Add(sizer_1, 0, wx.EXPAND, 0)
-        sizerAtoms.Add(self.gridAtoms, 1, wx.EXPAND, 0)
-        sizerMain.Add(sizerAtoms, 5, wx.EXPAND | wx.ALL, 20)
-        self.gridAtoms.AutosizeLabels()
-        self.gridAtoms.AutoSizeColumns()
-        sizer_4.Add(2,1,1)
-        sizer_4.Add(self.btn2, 0, wx.ALL | wx.ALIGN_RIGHT, 10)
-        sizer_4.Add(self.btn1, 0, wx.ALL | wx.ALIGN_RIGHT, 10)
-        sizerMain.Add(sizer_4, 0, wx.EXPAND, 0)
-        self.SetSizer(sizerMain)
-        sizerMain.Fit(self)
+        self.btn1 = wx.Button(self.panel_1, wx.ID_ANY, "Cancel")
+        sizer_3.Add(self.btn1, 0, wx.RIGHT, 10)
+
+        self.btn2 = wx.Button(self.panel_1, wx.ID_ANY, "Ok")
+        sizer_3.Add(self.btn2, 0, 0, 0)
+
+        self.panel_1.SetSizer(sizer_1)
+
         self.Layout()
 
+        self.Bind(wx.EVT_BUTTON, self.destroy, self.btn1)
+        self.Bind(wx.EVT_BUTTON, self.destroy, self.btn2)
+        # end wxGlade
+        self.refresh()
+        self.Show()
+
     def destroy(self, event):
-        frame = self.GetParent()
-        frame.Close()
+        self.Close()
 
     def arrayToStr(self, arr):
         """returns basis and kvec numpy arrays in str format
