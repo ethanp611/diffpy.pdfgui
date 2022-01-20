@@ -71,6 +71,7 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.onPageChanged, self.fitnotebook)
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.onPageChanging, self.fitnotebook)
         self.Bind(wx.EVT_CHECKBOX, self.onCheck, self.enableMag)
+        self.Bind(wx.EVT_RADIOBOX, self.checkNormalized, self.mpdfType)
         # end wxGlade
         self.__customProperties()
 
@@ -81,6 +82,18 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
         self.mainFrame = None
         return
 
+    def checkNormalized(self, event):
+        if self.mpdfType.GetStringSelection() == "Normalized":
+            for fit in (self.treeCtrlMain.control.fits):
+                for struc in (fit.strucs):
+                    if struc.magStructure != None:
+                        struc.magStructure.normalized = True
+        elif self.mpdfType.GetStringSelection() == "Unnormalized":
+            for fit in (self.treeCtrlMain.control.fits):
+                for struc in (fit.strucs):
+                    if struc.magStructure != None:
+                        struc.magStructure.normalized = False
+
     def onCheck(self, event):
         """Toggles magnetic PDF in both fitting and phase options"""
         print("Toggling magnetism")
@@ -89,7 +102,7 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
             for struc in (fit.strucs):
                 struc.magnetism = self.enableMag.GetValue()
                 if struc.magStructure == None:
-                    struc.magStructure = MagStructure()
+                    struc.magStructure = MagStructure(struc)
                     struc.magStructure.corr = 0
                     struc.magStructure.ord = 0
                     struc.magStructure.para = 0
@@ -97,14 +110,14 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
                     for i in range(len(struc.magnetic_atoms)):
                         struc.magnetic_atoms[i] = [0,""]
 
-
+        """
         if self.enableMag.GetValue():
             self.mpdfType.Enable()
             self.fitProtocol.Enable()
         else:
             self.mpdfType.Disable()
             self.fitProtocol.Disable()
-
+        """
 
 
 

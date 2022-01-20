@@ -77,6 +77,7 @@ class FitStructure(PDFStructure):
         self.selected_pairs = "all-all"
         self.initial.pdffit['sgoffset'] = [0.0, 0.0, 0.0]
         self.custom_spacegroup = None
+        self.isNormalized = True
         return
 
 

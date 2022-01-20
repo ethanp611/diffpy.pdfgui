@@ -124,6 +124,7 @@ class MagConfigurePanel(wx.Panel):
         self.Bind(wx.grid.EVT_GRID_CMD_CELL_RIGHT_CLICK, self.onCellRightClick, self.gridAtoms)
         self.Bind(wx.grid.EVT_GRID_CMD_EDITOR_SHOWN, self.onEditorShown, self.gridAtoms)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_CLICK, self.onLabelRightClick, self.gridAtoms)
+        self.Bind(wx.EVT_RADIOBOX, self.checkNormalized, self.radio1)
         # end wxGlade
         self.magviewOpen = False
         self.__customProperties()
@@ -205,6 +206,12 @@ class MagConfigurePanel(wx.Panel):
     # Create the onTextCtrlKey event handler from textCtrlAsGridCell from
     # wxextensions.textctrlutils
     onTextCtrlKey = textCtrlAsGridCell
+
+    def checkNormalized(self, event):
+        if self.radio1.GetStringSelection() == "Normalized":
+            self.structure.magStructure.normalized = True
+        elif self.radio1.GetStringSelection() == "Unnormalized":
+            self.structure.magStructure.normalized = False
 
     def _cache(self):
         """Cache the current structure and constraints for future comparison."""

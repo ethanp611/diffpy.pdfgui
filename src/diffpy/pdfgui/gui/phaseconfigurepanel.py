@@ -18,6 +18,7 @@
 
 import wx
 import wx.grid
+import numpy as np
 from diffpy.structure import Atom
 from diffpy.pdffit2 import is_element
 from diffpy.pdfgui.gui.insertrowsdialog import InsertRowsDialog
@@ -34,6 +35,7 @@ from diffpy.utils.wx import gridutils
 from diffpy.pdfgui.gui.magconfigurepanel import MagConfigurePanel
 from diffpy.pdfgui.gui.magconstraintspanel import MagConstraintsPanel
 from diffpy.pdfgui.control.magstructure import MagStructure
+from diffpy.pdfgui.control.magstructure import MagSpecies
 import random, string
 
 class PhaseConfigurePanel(wx.Panel, PDFPanel):
@@ -98,6 +100,7 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_CLICK,
                   self.onLabelRightClick, self.gridAtoms)
         #self.Bind(wx.EVT_CHECKBOX, self.onCheck, self.enableMag)
+        self.Bind(wx.EVT_BUTTON, self.onTest, self.buttonMagviewer)
 
         # end wxGlade
         self.__customProperties()
@@ -163,6 +166,10 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
         grid_sizer_3.Add(self.textCtrlGamma, 0,
                          wx.ALIGN_CENTER_VERTICAL | wx.ALL, 0)
         #sizer_2.Add(self.enableMag, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 15)
+
+        self.buttonMagviewer = wx.Button(self, wx.ID_ANY, "Mag Viewer")
+        sizer_1.Add(self.buttonMagviewer, 0, wx.ALIGN_CENTER_VERTICAL |
+                         wx.ALIGN_RIGHT | wx.ALL, 5)
 
         sizerLatticeParameters.Add(grid_sizer_3, 1, wx.EXPAND, 0)
         sizerLatticeParameters.Add(sizer_2, 2, wx.EXPAND,0)
@@ -446,7 +453,15 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
                 if value == 1 and self.structure.magnetic_atoms[i][1] == "":
                     # if not a magSpecies (name = "" or not in dict), create and insert
                     label = self.randValidKey()
-                    self.structure.magStructure.makeSpecies(label=label)
+                    msp = MagSpecies(self.structure, strucIdxs=[i], label=label, rmaxAtoms=10, basisvecs=np.array([0,0,1]),
+                                    kvecs=np.array([0,0,0]))
+                    self.structure.magStructure.loadSpecies(msp)
+                    #self.structure.magStructure.makeAll()
+                    #self.structure.magStructure.makeSpecies(label=label)
+                    #print(self.structure.magStructure.atoms)
+                    #print(self.structure.magStructure.spins)
+                    #self.structure.magStructure.magSpecies[label].makeAtoms()
+                    #self.structure.magStructure.magSpecies[label].makeSpins()
                     self.structure.magnetic_atoms[i] = [value,label]
                     print("magStructure", self.structure.magStructure)
                     print(self.structure.magStructure.species)
@@ -456,6 +471,8 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
                     if self.structure.magStructure and self.structure.magnetic_atoms[i][1] in self.structure.magStructure.species:
                         self.structure.magStructure.removeSpecies(label=self.structure.magnetic_atoms[i][1])
                         self.structure.magnetic_atoms[i] = [value,""]
+                        print(len(self.structure.magStructure.atoms))
+                        print(len(self.structure.magStructure.spins))
             self.mainFrame.needsSave()
             return value
 
@@ -563,6 +580,18 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
         self._selectedCells = gridutils.getSelectedCells(self.gridAtoms)
         return
 
+    def onTest(self, event):
+        if self.structure.magStructure is None:
+            return
+
+        try:
+            for i in range(len(self.structure.magnetic_atoms)):
+                if self.structure.magnetic_atoms[i][0] == 1:
+                    label = self.structure.magnetic_atoms[i][1]
+                    print(self.structure.magStructure.species[label].basisvecs)
+        except ValueError:
+            return
+
     def onCellChange(self, event): # wxGlade: PhaseConfigurePanel.<event_handler>
         """Update focused and selected text when a cell changes."""
         # NOTE: be careful with refresh(). It calls Grid.AutoSizeColumns, which
@@ -582,6 +611,15 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
         self.fillCells(value)
         self._focusedText = None
         return
+
+    """
+    def updateMagXYZ(self):
+        count = 0
+        magAtoms = []
+        for a in self.structure.magnetic_atoms:
+            if a[0] == 1:
+                magAtoms +=
+    """
 
     def fillCells(self, value):
         """Fill cells with a given value.

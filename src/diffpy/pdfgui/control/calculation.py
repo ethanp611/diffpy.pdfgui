@@ -19,6 +19,7 @@
 import copy
 import math
 
+from diffpy.pdfgui.control.mpdfcalculator import MPDFcalculator
 from diffpy.pdfgui.control.controlerrors import ControlConfigError
 from diffpy.pdfgui.control.controlerrors import ControlKeyError
 from diffpy.pdfgui.control.controlerrors import ControlValueError
@@ -159,6 +160,8 @@ class Calculation(PDFComponent):
         # initialize the calculator
 
         #Initialize the mag calc
+        mc = MPDFcalculator()
+
         if self.pctype == 'PC': # use PDFCalculator
             pc = PDFCalculator()
         elif self.pctype == 'DPC': # use DebyePDFCalculator
@@ -176,14 +179,39 @@ class Calculation(PDFComponent):
         pc.rstep = self.rstep
         pc.scale = self.dscale
 
+        mc.qmax = self.qmax
+        mc.qmin = self.qmin
+        mc.qdamp = self.qdamp
+        mc.qbroad = self.qbroad
+        mc.rmin = self.rmin
+        mc.rmax = self.rmax
+        mc.rstep = self.rstep
+        mc.scale = self.dscale
+
         # load structure and disable metadata using the nometa function
         # and set any calculator attributes as needed as above
         r_list = []
         g_list = []
+
+        rMag_list = []
+        frMag_list = []
+
         self.owner.applyParameters()
         for struc in self.owner.strucs:
             # pc is for one calculation. the common setting
             # pc_temp is for each phase, specific setting
+            rMag, frMag = 0, 0
+            if struc.magStructure:
+                struc.magStructure.makeAll()
+                #print(struc.magStructure.atoms)
+                #print(struc.magStructure.spins)
+                mc.magstruc = struc.magStructure
+                rMag, frMag = mc.calc()
+                rMag = rMag[:-1]
+                frMag = frMag[:-1]
+            rMag_list.append(rMag)
+            frMag_list.append(frMag)
+
             pc_temp = pc.copy()
             pc_temp.delta1 = struc.getvar('delta1')
             pc_temp.delta2 = struc.getvar('delta2')
@@ -193,7 +221,6 @@ class Calculation(PDFComponent):
             if struc.getvar('stepcut'):
                 pc_temp.addEnvelope('stepcut')
                 pc_temp.stepcut = struc.getvar('stepcut')
-
 
             ##TODO: pair mask. the baseline is not correct with PDFFIT.
             struc.applyCMIPairSelection(pc_temp)
@@ -210,10 +237,15 @@ class Calculation(PDFComponent):
         # get results
 
         self.rcalc = r_list[0].tolist()  # r0, r1, r2 are the same, so just use r0
+        print("rcalc")
+        print(self.rcalc)
+        print("rmag")
+        print(rMag)
+        # compare rcalc to rMag
         # sum up multi-phase PDFs
         gsum = 0
         for i in range(len(self.owner.strucs)):
-            gsum += g_list[i]
+            gsum += g_list[i] + frMag_list[i]
         self.Gcalc = gsum.tolist()
 
         return
