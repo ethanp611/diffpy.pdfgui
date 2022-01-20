@@ -100,7 +100,6 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_CLICK,
                   self.onLabelRightClick, self.gridAtoms)
         #self.Bind(wx.EVT_CHECKBOX, self.onCheck, self.enableMag)
-        self.Bind(wx.EVT_BUTTON, self.onTest, self.buttonMagviewer)
 
         # end wxGlade
         self.__customProperties()
@@ -166,10 +165,6 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
         grid_sizer_3.Add(self.textCtrlGamma, 0,
                          wx.ALIGN_CENTER_VERTICAL | wx.ALL, 0)
         #sizer_2.Add(self.enableMag, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 15)
-
-        self.buttonMagviewer = wx.Button(self, wx.ID_ANY, "Mag Viewer")
-        sizer_1.Add(self.buttonMagviewer, 0, wx.ALIGN_CENTER_VERTICAL |
-                         wx.ALIGN_RIGHT | wx.ALL, 5)
 
         sizerLatticeParameters.Add(grid_sizer_3, 1, wx.EXPAND, 0)
         sizerLatticeParameters.Add(sizer_2, 2, wx.EXPAND,0)
@@ -579,18 +574,6 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
         self._focusedText = self.gridAtoms.GetCellValue(i,j)
         self._selectedCells = gridutils.getSelectedCells(self.gridAtoms)
         return
-
-    def onTest(self, event):
-        if self.structure.magStructure is None:
-            return
-
-        try:
-            for i in range(len(self.structure.magnetic_atoms)):
-                if self.structure.magnetic_atoms[i][0] == 1:
-                    label = self.structure.magnetic_atoms[i][1]
-                    print(self.structure.magStructure.species[label].basisvecs)
-        except ValueError:
-            return
 
     def onCellChange(self, event): # wxGlade: PhaseConfigurePanel.<event_handler>
         """Update focused and selected text when a cell changes."""
