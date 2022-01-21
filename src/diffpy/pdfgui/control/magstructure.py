@@ -408,6 +408,7 @@ class MagStructure:
         self.Uiso = Uiso
         self.corrLength = corrLength
         self.verbose = verbose
+        self.normalized = True
 
     def __repr__(self):
         if self.label == '':

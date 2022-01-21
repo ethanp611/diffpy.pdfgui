@@ -94,6 +94,14 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
                     if struc.magStructure != None:
                         struc.magStructure.normalized = False
 
+    def getNormalized(self):
+        for fit in (self.treeCtrlMain.control.fits):
+            for struc in (fit.strucs):
+                if struc.magStructure != None and struc.magStructure.normalized == True:
+                    self.mpdfType.SetSelection(0)
+                elif struc.magStructure != None and struc.magStructure.normalized == False:
+                    self.mpdfType.SetSelection(1)
+
     def onCheck(self, event):
         """Toggles magnetic PDF in both fitting and phase options"""
         print("Toggling magnetism")
@@ -132,6 +140,7 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
     def refresh(self):
         """Refresh the panels."""
         if not self.fit: return
+        self.getNormalized()
         panel = self.fitnotebook.GetCurrentPage()
         panel.mainFrame = self.mainFrame
         panel.refresh()

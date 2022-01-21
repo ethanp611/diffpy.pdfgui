@@ -206,7 +206,7 @@ class Calculation(PDFComponent):
                 #print(struc.magStructure.atoms)
                 #print(struc.magStructure.spins)
                 mc.magstruc = struc.magStructure
-                rMag, frMag = mc.calc()
+                rMag, frMag = mc.calc(normalized=struc.magStructure.normalized)
                 rMag = rMag[:-1]
                 frMag = frMag[:-1]
             rMag_list.append(rMag)

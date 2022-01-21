@@ -77,7 +77,7 @@ class MagConfigurePanel(wx.Panel):
         grid_sizer_2 = wx.FlexGridSizer(1, 6, 0, 0)
         sizer_3.Add(grid_sizer_2, 1, wx.EXPAND, 0)
 
-        self.radio1 = wx.RadioBox(self, wx.ID_ANY, "mPDF Type", choices=["Unnormalized", "Normalized"], majorDimension=1, style=wx.RA_SPECIFY_COLS)
+        self.radio1 = wx.RadioBox(self, wx.ID_ANY, "mPDF Type", choices=["Normalized", "Unnormalized"], majorDimension=1, style=wx.RA_SPECIFY_COLS)
         self.radio1.SetSelection(0)
         grid_sizer_2.Add(self.radio1, 1, wx.BOTTOM | wx.RIGHT | wx.TOP, 5)
 
@@ -213,6 +213,12 @@ class MagConfigurePanel(wx.Panel):
         elif self.radio1.GetStringSelection() == "Unnormalized":
             self.structure.magStructure.normalized = False
 
+    def getNormalized(self):
+        if self.structure.magStructure.normalized == True:
+            self.radio1.SetSelection(0)
+        else:
+            self.radio1.SetSelection(1)
+
     def _cache(self):
         """Cache the current structure and constraints for future comparison."""
         pass
@@ -231,6 +237,7 @@ class MagConfigurePanel(wx.Panel):
 
     def refresh(self):
         """Refreshes widgets on the panel."""
+        self.getNormalized()
         magpanelutils.refreshTextCtrls(self)
         pairs = self.structure.getSelectedPairs()
         self.textCtrlIncludedPairs.SetValue(pairs)
