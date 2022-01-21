@@ -203,12 +203,8 @@ class Calculation(PDFComponent):
             rMag, frMag = 0, 0
             if struc.magStructure:
                 struc.magStructure.makeAll()
-                #print(struc.magStructure.atoms)
-                #print(struc.magStructure.spins)
                 mc.magstruc = struc.magStructure
                 rMag, frMag = mc.calc(normalized=struc.magStructure.normalized)
-                rMag = rMag[:-1]
-                frMag = frMag[:-1]
             rMag_list.append(rMag)
             frMag_list.append(frMag)
 
@@ -231,17 +227,23 @@ class Calculation(PDFComponent):
                 g = g * struc.getvar('pscale')
             r_list.append(r)
             g_list.append(g)
-        print("len(r_list)", len(r_list))
-        print("len(g_list)", len(g_list))
+        #print("len(r_list)", len(r_list))
+        #print("len(g_list)", len(g_list))
 
         # get results
 
         self.rcalc = r_list[0].tolist()  # r0, r1, r2 are the same, so just use r0
-        print("rcalc")
-        print(self.rcalc)
-        print("rmag")
-        print(rMag)
-        # compare rcalc to rMag
+
+        sizeDifference = len(rMag)-len(self.rcalc)
+        if sizeDifference > 0: # If rMag has a larger size than rcalc, all mag elements are shrunk
+            for i in range(len(rMag_list)):
+                rMag_list[i] = rMag_list[i][:-sizeDifference]
+                frMag_list[i] = frMag_list[i][:-sizeDifference]
+        elif sizeDifference < 0: # If rcalc has a larger size than rMag, all atomic elements are shrunk
+            for i in range (len(r_list)):
+                r_list[i] = r_list[i][:-sizeDifference]
+                g_list[i] = g_list[i][:-sizeDifference]
+
         # sum up multi-phase PDFs
         gsum = 0
         for i in range(len(self.owner.strucs)):
