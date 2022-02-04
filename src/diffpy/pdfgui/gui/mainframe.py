@@ -2501,6 +2501,7 @@ class MainFrame(wx.Frame):
         #long
         # TODO: append CMI result after pdffit result
         if self.control.getCMIOutput():
+            print("update")
             self.outputPanel.updateText(self.control.getCMIOutput())
             self.control.resetCMIOutput() #only output cmi results once
         #end long

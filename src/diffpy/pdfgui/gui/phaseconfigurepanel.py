@@ -448,8 +448,8 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
                 if value == 1 and self.structure.magnetic_atoms[i][1] == "":
                     # if not a magSpecies (name = "" or not in dict), create and insert
                     label = self.randValidKey()
-                    msp = MagSpecies(self.structure, strucIdxs=[i], label=label, rmaxAtoms=10, basisvecs=np.array([0,0,1]),
-                                    kvecs=np.array([0,0,0]))
+                    msp = MagSpecies(self.structure, strucIdxs=[i], label=label, rmaxAtoms=10, basisvecs=np.array([(0,0,1)]),
+                                    kvecs=np.array([(0,0,0)]))
                     self.structure.magStructure.loadSpecies(msp)
                     #self.structure.magStructure.makeAll()
                     #self.structure.magStructure.makeSpecies(label=label)

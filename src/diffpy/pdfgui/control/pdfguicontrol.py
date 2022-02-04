@@ -96,7 +96,6 @@ class PDFGuiControl:
         if self.currentFitting:
             # wait for currentFitting
             self.currentFitting.join()
-
         # No fitting in the queue is running.
         try:
             self.lock.acquire()
@@ -122,7 +121,7 @@ class PDFGuiControl:
                 if enter:
                     try:
                         self.fittingQueue.index(fit)
-                        # if no exception, then it already in the queue,
+                        # if no exception, then it is already in the queue,
                         # continue to next
                         continue
                     except ValueError:
@@ -168,7 +167,7 @@ class PDFGuiControl:
         name      --  unique name for this Fitting
         position  --  where Fitting is inserted, default is last place
 
-        return: Fitting reference
+        return: Fitting referencefittingqueue
         """
         fitting = Fitting(name, mag)
         self.add(fitting, position)
@@ -492,7 +491,7 @@ class PDFGuiControl:
         """execute Calculations and Fittings in IDlist.
         """
         self.redirectStdout()
-        fits = [ ID for ID in IDlist if isinstance(ID, Fitting) ]
+        fits = [ ID for ID in IDlist if isinstance(ID, Fitting) ] # Potential problem
         # only add calcs which is not in fits, because fits will automatically run calcs under it anyway
         calcs = [ ID for ID in IDlist if isinstance(ID, Calculation) and ID.owner not in fits]
         for calc in calcs:

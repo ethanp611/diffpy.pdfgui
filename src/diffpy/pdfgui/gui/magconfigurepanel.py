@@ -125,6 +125,9 @@ class MagConfigurePanel(wx.Panel):
         self.Bind(wx.grid.EVT_GRID_CMD_EDITOR_SHOWN, self.onEditorShown, self.gridAtoms)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_CLICK, self.onLabelRightClick, self.gridAtoms)
         self.Bind(wx.EVT_RADIOBOX, self.checkNormalized, self.radio1)
+        self.Bind(wx.EVT_TEXT, self.applyTextCtrlPanel, self.textCtrlCorrLength)
+        self.Bind(wx.EVT_TEXT, self.applyTextCtrlPanel, self.textCtrlOrdScale)
+        self.Bind(wx.EVT_TEXT, self.applyTextCtrlPanel, self.textCtrlParaScale)
         # end wxGlade
         self.magviewOpen = False
         self.__customProperties()
@@ -167,6 +170,8 @@ class MagConfigurePanel(wx.Panel):
             'textCtrlOrdScale': 'lat(2)',
             'textCtrlParaScale': 'lat(3)',
         }
+
+        #self.lConstraintsMap = {}
 
         # bind onSetFocus onKillFocus events to text controls
 
@@ -238,7 +243,7 @@ class MagConfigurePanel(wx.Panel):
     def refresh(self):
         """Refreshes widgets on the panel."""
         self.getNormalized()
-        magpanelutils.refreshTextCtrls(self)
+        #magpanelutils.refreshTextCtrls(self)
         pairs = self.structure.getSelectedPairs()
         self.textCtrlIncludedPairs.SetValue(pairs)
         magpanelutils.refreshGrid(self)
@@ -299,7 +304,27 @@ class MagConfigurePanel(wx.Panel):
 
         return
 '''
+    def applyTextCtrlPanel(self, event):
+        """Update a structure according to a change in a TextCtrl.
 
+        id      --  textctrl id
+        value   --  new value
+        """
+        if self.structure is None:
+            return
+        textCtrl = event.GetEventObject()
+        id = textCtrl.GetId()
+        try:
+            if id == self.textCtrlCorrLength.GetId():
+                self.structure.magStructure.corrLength = self.textCtrlCorrLength.GetText()
+            elif id == self.textCtrlOrdScale.GetId():
+                self.structure.mpdffit['ordScale'] = self.textCtrlOrdScale.GetText()
+            elif id == self.textCtrlParaScale.GetId():
+                self.structure.mpdffit['paraScale'] = self.textCtrlParaScale.GetText()
+            return value
+
+        except:
+            return None
 # self.mpdffit = {"qdamp": 0.0, "ordScale": 1.0, "paraScale": 1.0}
     def applyTextCtrlChange(self, id, value):
         """Update a structure according to a change in a TextCtrl.
@@ -337,8 +362,8 @@ class MagConfigurePanel(wx.Panel):
             text = text.replace("}", ")")
             if text[-1] != ",":
                 text = text + ","
-            if not re.match("^(\(\d*\.?\d+\,\d*\.?\d+\,\d*\.?\d+\),)+$", text):
-                return
+            #if not re.match("^(\(\d*\.?\d+\,\d*\.?\d+\,\d*\.?\d+\),)+$", text):
+                #return
             text = text[:-1]
             ret = []
             crds = text.split('),')  # split coordinates
@@ -378,6 +403,7 @@ class MagConfigurePanel(wx.Panel):
             label = self.structure.magnetic_atoms[i][1]
             if j == 1:
                 value = self.readCoordinates(value)
+                print(value)
                 # basis vecs
                 self.structure.magStructure.species[label].basisvecs = value
                 value = self.arrayToStr(value)
@@ -477,6 +503,7 @@ class MagConfigurePanel(wx.Panel):
 
     def onKillFocus(self, event):
         """Check value of TextCtrl and update structure if necessary."""
+        """
         if not self.mainFrame:
             return
         textctrl = event.GetEventObject()
@@ -487,6 +514,7 @@ class MagConfigurePanel(wx.Panel):
             self.mainFrame.needsSave()
         self._focusedText = None
         event.Skip()
+        """
         return
 
     def onSelectedPairs(self, event):
@@ -574,13 +602,12 @@ class MagConfigurePanel(wx.Panel):
                 # Get the last valid text from the cell. For the cell that triggered
                 # this method, that is the _focusedText, for other cells it is the
                 # value returned by GetCellValue
-                oldvalue = self._focusedText or self.gridAtoms.GetCellValue(
-                    i, j)
+                oldvalue = self._focusedText or self.gridAtoms.GetCellValue(i, j)
                 self._focusedText = None
                 newvalue = self.applyCellChange(i, j, value)
                 if newvalue is None:
                     newvalue = oldvalue
-                self.gridAtoms.SetCellValue(i, j, str(newvalue))
+                self.gridAtoms.SetCellValue(i, j, str(value))
 
         gridutils.quickResizeColumns(self.gridAtoms, self._selectedCells)
         return
