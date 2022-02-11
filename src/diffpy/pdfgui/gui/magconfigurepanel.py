@@ -316,11 +316,15 @@ class MagConfigurePanel(wx.Panel):
         id = textCtrl.GetId()
         try:
             if id == self.textCtrlCorrLength.GetId():
-                self.structure.magStructure.corrLength = self.textCtrlCorrLength.GetText()
+                value = float(self.textCtrlCorrLength.GetValue())
+                self.structure.magStructure.corrLength = value
+                self.textCtrlCorrLength.SetValue(value)
             elif id == self.textCtrlOrdScale.GetId():
-                self.structure.mpdffit['ordScale'] = self.textCtrlOrdScale.GetText()
+                value = float(self.textCtrlOrdScale.GetValue())
+                self.structure.mpdffit['ordScale'] = value
             elif id == self.textCtrlParaScale.GetId():
-                self.structure.mpdffit['paraScale'] = self.textCtrlParaScale.GetText()
+                value = float(self.textCtrlParaScale.GetValue())
+                self.structure.mpdffit['paraScale'] = value
             return value
 
         except:
@@ -369,7 +373,9 @@ class MagConfigurePanel(wx.Panel):
             crds = text.split('),')  # split coordinates
             for i, crd in enumerate(crds):
                 if crd[0] != '(':  # verify valid coordinate
-                    return
+                    crd = "(" + crd
+                if crd[-1] != ')':
+                    crd = crd + ")"
                 if i == len(crds) - 1:  # remove end parenthesis not removed by split
                     crd = crd[:-1]
                 crd = crd[1:]  # remove start parentheses
@@ -378,7 +384,11 @@ class MagConfigurePanel(wx.Panel):
                     return
                 arr = []
                 for val in crd:
-                    arr.append(float(val))  # add each value to an array
+                    print(val)
+                    if val.replace('.','',1).isdigit() is True:  # checks validity of input
+                        arr.append(float(val))  # add each value to an array
+                    else:
+                        return
                 ret.append(arr)
             return np.array(ret)
 
@@ -403,7 +413,6 @@ class MagConfigurePanel(wx.Panel):
             label = self.structure.magnetic_atoms[i][1]
             if j == 1:
                 value = self.readCoordinates(value)
-                print(value)
                 # basis vecs
                 self.structure.magStructure.species[label].basisvecs = value
                 value = self.arrayToStr(value)
@@ -607,7 +616,7 @@ class MagConfigurePanel(wx.Panel):
                 newvalue = self.applyCellChange(i, j, value)
                 if newvalue is None:
                     newvalue = oldvalue
-                self.gridAtoms.SetCellValue(i, j, str(value))
+                self.gridAtoms.SetCellValue(i, j, newvalue)
 
         gridutils.quickResizeColumns(self.gridAtoms, self._selectedCells)
         return
