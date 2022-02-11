@@ -101,7 +101,7 @@ class MagConfigurePanel(wx.Panel):
         self.gridAtoms.CreateGrid(0, 4)
         self.gridAtoms.EnableDragRowSize(0)
         self.gridAtoms.SetColLabelValue(0, "elem")
-        self.gridAtoms.SetColLabelValue(1, "basic vecs")
+        self.gridAtoms.SetColLabelValue(1, "basis vecs")
         self.gridAtoms.SetColLabelValue(2, "prop. vecs")
         self.gridAtoms.SetColLabelValue(3, "FF key")
         sizerAtoms.Add(self.gridAtoms, 1, wx.EXPAND, 0)
