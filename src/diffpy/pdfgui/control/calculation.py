@@ -186,7 +186,7 @@ class Calculation(PDFComponent):
         mc.rmin = self.rmin
         mc.rmax = self.rmax
         mc.rstep = self.rstep
-        mc.scale = self.dscale
+        #mc.scale = self.dscale
 
         # load structure and disable metadata using the nometa function
         # and set any calculator attributes as needed as above
@@ -204,6 +204,8 @@ class Calculation(PDFComponent):
             if struc.magStructure:
                 struc.magStructure.makeAll()
                 mc.magstruc = struc.magStructure
+                mc.ordScale = struc.mpdffit['ordScale']
+                mc.paraScale = struc.mpdffit['paraScale']
                 rMag, frMag = mc.calc(normalized=struc.magStructure.normalized)
             rMag_list.append(rMag)
             frMag_list.append(frMag)
@@ -225,10 +227,9 @@ class Calculation(PDFComponent):
             r, g = pc_temp(nometa(struc))
             if struc.getvar('pscale'):
                 g = g * struc.getvar('pscale')
+
             r_list.append(r)
             g_list.append(g)
-        #print("len(r_list)", len(r_list))
-        #print("len(g_list)", len(g_list))
 
         # get results
 
@@ -247,7 +248,7 @@ class Calculation(PDFComponent):
         # sum up multi-phase PDFs
         gsum = 0
         for i in range(len(self.owner.strucs)):
-            gsum += g_list[i] + frMag_list[i]
+            gsum += ((g_list[i] + frMag_list[i]) * self.dscale)
         self.Gcalc = gsum.tolist()
 
         return

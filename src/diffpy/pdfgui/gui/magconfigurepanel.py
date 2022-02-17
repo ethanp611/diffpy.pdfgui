@@ -62,13 +62,13 @@ class MagConfigurePanel(wx.Panel):
         label_1 = wx.StaticText(self, wx.ID_ANY, "ord. scale")
         grid_sizer_3.Add(label_1, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
-        self.textCtrlOrdScale = wx.TextCtrl(self, wx.ID_ANY, "0.0", style=wx.TE_PROCESS_ENTER)
+        self.textCtrlOrdScale = wx.TextCtrl(self, wx.ID_ANY, "1.0", style=wx.TE_PROCESS_ENTER)
         grid_sizer_3.Add(self.textCtrlOrdScale, 0, wx.ALIGN_CENTER | wx.BOTTOM | wx.TOP, 5)
 
         labelParaScale = wx.StaticText(self, wx.ID_ANY, "para. scale")
         grid_sizer_3.Add(labelParaScale, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
-        self.textCtrlParaScale = wx.TextCtrl(self, wx.ID_ANY, "0.0", style=wx.TE_PROCESS_ENTER)
+        self.textCtrlParaScale = wx.TextCtrl(self, wx.ID_ANY, "1.0", style=wx.TE_PROCESS_ENTER)
         grid_sizer_3.Add(self.textCtrlParaScale, 0, wx.ALIGN_CENTER | wx.BOTTOM | wx.TOP, 5)
 
         sizer_3 = wx.BoxSizer(wx.HORIZONTAL)
