@@ -225,8 +225,8 @@ class Calculation(PDFComponent):
             # pc_temp.setTypeMask("Ni","O",True)
 
             r, g = pc_temp(nometa(struc))
-            if struc.getvar('pscale'):
-                g = g * struc.getvar('pscale')
+            #if struc.getvar('pscale'):
+            g = g * struc.getvar('pscale')
 
             r_list.append(r)
             g_list.append(g)
