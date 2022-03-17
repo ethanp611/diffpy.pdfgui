@@ -56,13 +56,7 @@ class MPDFcalculator:
             magnetic form factor required for unnormalized mPDF.
         rmaxtr (float): maximum value of r for the Fourier transform of the
             magnetic form factor required for unnormalized mPDF.
-        drtr (float): step size for r-grid used for calculating Fourier        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.onPageChanged, self.fitnotebook)
-        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.onPageChanging, self.fitnotebook)
-        self.Bind(wx.EVT_CHECKBOX, self.onCheck, self.enableMag)
-        self.Bind(wx.EVT_RADIOBOX, self.checkNormalized, self.mpdfType)
-        # end wxGlade
-        self.__customProperties()
-
+        drtr (float): step size for r-grid used for calculating Fourier        
             transform of magnetic form mactor.
         label (string): Optional descriptive string for the MPDFcalculator.
         """

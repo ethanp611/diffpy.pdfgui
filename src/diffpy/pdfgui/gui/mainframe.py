@@ -1888,7 +1888,7 @@ class MainFrame(wx.Frame):
         """Stop all fits.
 
         This removes all items from the runningDict and changes the status
-        colors back to wxWHITE.
+        colors back to wxWHITE.'fit
         """
         self.control.stop()
         self.needsSave()

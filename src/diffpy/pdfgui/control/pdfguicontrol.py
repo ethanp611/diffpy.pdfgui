@@ -91,7 +91,7 @@ class PDFGuiControl:
         self.queueManager.setDaemon(True)
         self.queueManager.start()
 
-    def checkQueue(self):
+    def checkQueue(self, run = True):
         """find next fitting in the queue and start it"""
         if self.currentFitting:
             # wait for currentFitting
@@ -107,7 +107,8 @@ class PDFGuiControl:
         finally:
             self.lock.release()
 
-        self.currentFitting.start()
+        if run is True:
+            self.currentFitting.start()
 
     def enqueue(self, fits, enter = True):
         """enqueue or dequeue fittings
@@ -490,6 +491,7 @@ class PDFGuiControl:
     def start(self, IDlist):
         """execute Calculations and Fittings in IDlist.
         """
+        print("start")
         self.redirectStdout()
         fits = [ ID for ID in IDlist if isinstance(ID, Fitting) ] # Potential problem
         # only add calcs which is not in fits, because fits will automatically run calcs under it anyway
