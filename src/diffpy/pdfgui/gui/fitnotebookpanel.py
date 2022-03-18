@@ -86,6 +86,8 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
         return
 
     def checkNormalized(self, event):
+        if len(self.fit.strucs) == 0:
+            return
         if self.mpdfType.GetStringSelection() == "Normalized":
             for struc in (self.fit.strucs):
                 if struc.magStructure != None:
@@ -96,6 +98,8 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
                     struc.magStructure.normalized = False
 
     def getNormalized(self):
+        if len(self.fit.strucs) == 0:
+            return
         for struc in (self.fit.strucs):
             if struc.magStructure != None and struc.magStructure.normalized == True:
                 self.mpdfType.SetSelection(0)
@@ -105,12 +109,8 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
     def onCheck(self, event):
         """Toggles magnetic PDF in both fitting and phase options"""
         print("Toggling magnetism")
-        #for fit in (self.treeCtrlMain.control.fits):
-        #self.treeCtrlMain.control.enqueue(self.treeCtrlMain.control.fits)
-        #self.treeCtrlMain.control.checkQueue(run = False)
-        #self.fit = self.treeCtrlMain.control.currentFitting
-        #selection = self.treeCtrlMain.GetSelections()[0]
-        #self.fit = self.treeCtrlMain.GetControlData(selection)
+        if len(self.fit.strucs) == 0:
+            return
         self.fit.magnetism = self.enableMag.GetValue()
         for struc in (self.fit.strucs):
             struc.magnetism = self.enableMag.GetValue()
