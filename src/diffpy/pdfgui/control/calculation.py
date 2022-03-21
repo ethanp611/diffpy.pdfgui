@@ -195,6 +195,7 @@ class Calculation(PDFComponent):
 
         rMag_list = []
         frMag_list = []
+        isMagnetic = False
 
         self.owner.applyParameters()
         for struc in self.owner.strucs:
@@ -202,6 +203,7 @@ class Calculation(PDFComponent):
             # pc_temp is for each phase, specific setting
             rMag, frMag = 0, 0
             if struc.magStructure:
+                isMagnetic = True
                 struc.magStructure.makeAll()
                 mc.magstruc = struc.magStructure
                 mc.ordScale = struc.mpdffit['ordScale']
@@ -235,15 +237,16 @@ class Calculation(PDFComponent):
 
         self.rcalc = r_list[0].tolist()  # r0, r1, r2 are the same, so just use r0
 
-        sizeDifference = len(rMag)-len(self.rcalc)
-        if sizeDifference > 0: # If rMag has a larger size than rcalc, all mag elements are shrunk
-            for i in range(len(rMag_list)):
-                rMag_list[i] = rMag_list[i][:-sizeDifference]
-                frMag_list[i] = frMag_list[i][:-sizeDifference]
-        elif sizeDifference < 0: # If rcalc has a larger size than rMag, all atomic elements are shrunk
-            for i in range (len(r_list)):
-                r_list[i] = r_list[i][:-sizeDifference]
-                g_list[i] = g_list[i][:-sizeDifference]
+        if isMagnetic is True:
+            sizeDifference = len(rMag)-len(self.rcalc)
+            if sizeDifference > 0: # If rMag has a larger size than rcalc, all mag elements are shrunk
+                for i in range(len(rMag_list)):
+                    rMag_list[i] = rMag_list[i][:-sizeDifference]
+                    frMag_list[i] = frMag_list[i][:-sizeDifference]
+            elif sizeDifference < 0: # If rcalc has a larger size than rMag, all atomic elements are shrunk
+                for i in range (len(r_list)):
+                    r_list[i] = r_list[i][:-sizeDifference]
+                    g_list[i] = g_list[i][:-sizeDifference]
 
         # sum up multi-phase PDFs
         gsum = 0
