@@ -202,7 +202,7 @@ class Calculation(PDFComponent):
             # pc is for one calculation. the common setting
             # pc_temp is for each phase, specific setting
             rMag, frMag = 0, 0
-            if struc.magStructure:
+            if struc.magnetism is True and len(struc.magStructure.species) > 0:
                 isMagnetic = True
                 struc.magStructure.makeAll()
                 mc.magstruc = struc.magStructure
@@ -237,7 +237,7 @@ class Calculation(PDFComponent):
 
         self.rcalc = r_list[0].tolist()  # r0, r1, r2 are the same, so just use r0
 
-        if isMagnetic is True:
+        if isMagnetic is True and len(rMag_list) > 0:
             sizeDifference = len(rMag)-len(self.rcalc)
             if sizeDifference > 0: # If rMag has a larger size than rcalc, all mag elements are shrunk
                 for i in range(len(rMag_list)):
