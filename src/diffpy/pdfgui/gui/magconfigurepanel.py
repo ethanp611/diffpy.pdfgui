@@ -213,12 +213,14 @@ class MagConfigurePanel(wx.Panel):
     onTextCtrlKey = textCtrlAsGridCell
 
     def checkNormalized(self, event):
+        """Sets the normalization of the structure."""
         if self.radio1.GetStringSelection() == "Normalized":
             self.structure.magStructure.normalized = True
         elif self.radio1.GetStringSelection() == "Unnormalized":
             self.structure.magStructure.normalized = False
 
     def getNormalized(self):
+        """Gets the normalization of the structure."""
         if self.structure.magStructure.normalized == True:
             self.radio1.SetSelection(0)
         else:
@@ -242,8 +244,13 @@ class MagConfigurePanel(wx.Panel):
 
     def refresh(self):
         """Refreshes widgets on the panel."""
+        if self.structure.magStructure is None:
+            return
         self.getNormalized()
         #magpanelutils.refreshTextCtrls(self)
+        self.textCtrlCorrLength.SetValue(str(self.structure.magStructure.corrLength))
+        self.textCtrlOrdScale.SetValue(str(self.structure.mpdffit['ordScale']))
+        self.textCtrlParaScale.SetValue(str(self.structure.mpdffit['paraScale']))
         pairs = self.structure.getSelectedPairs()
         self.textCtrlIncludedPairs.SetValue(pairs)
         magpanelutils.refreshGrid(self)
