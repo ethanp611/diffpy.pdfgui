@@ -18,6 +18,7 @@
 
 import copy
 import math
+import numpy as np
 
 from diffpy.pdfgui.control.mpdfcalculator import MPDFcalculator
 from diffpy.pdfgui.control.controlerrors import ControlConfigError
@@ -196,6 +197,7 @@ class Calculation(PDFComponent):
         rMag_list = []
         frMag_list = []
         isMagnetic = False
+        list_size = 0
 
         self.owner.applyParameters()
         for struc in self.owner.strucs:
@@ -209,6 +211,8 @@ class Calculation(PDFComponent):
                 mc.ordScale = struc.mpdffit['ordScale']
                 mc.paraScale = struc.mpdffit['paraScale']
                 rMag, frMag = mc.calc(normalized=struc.magStructure.normalized)
+                if len(rMag) > list_size:
+                    list_size = len(rMag)
             rMag_list.append(rMag)
             frMag_list.append(frMag)
 
@@ -237,11 +241,25 @@ class Calculation(PDFComponent):
 
         self.rcalc = r_list[0].tolist()  # r0, r1, r2 are the same, so just use r0
 
+        if isMagnetic is True:
+            for i in range(len(rMag_list)):
+                if isinstance(rMag_list[i], int):
+                    rMag_list[i] = np.zeros(list_size)
+                if isinstance(frMag_list[i], int):
+                    frMag_list[i] = np.zeros(list_size)
+        if isinstance(rMag, int):
+            rMag = np.zeros(list_size)
+        if isinstance(frMag, int):
+            frMag = np.zeros(list_size)
+
         if isMagnetic is True and len(rMag_list) > 0:
+            #print(type(rMag))
+            #print(type(self.rcalc))
             sizeDifference = len(rMag)-len(self.rcalc)
             if sizeDifference > 0: # If rMag has a larger size than rcalc, all mag elements are shrunk
                 for i in range(len(rMag_list)):
                     rMag_list[i] = rMag_list[i][:-sizeDifference]
+                    print(type(frMag_list[i]))
                     frMag_list[i] = frMag_list[i][:-sizeDifference]
             elif sizeDifference < 0: # If rcalc has a larger size than rMag, all atomic elements are shrunk
                 for i in range (len(r_list)):

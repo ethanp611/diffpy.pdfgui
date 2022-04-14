@@ -173,7 +173,7 @@ class AddPhasePanel(wx.Panel, PDFPanel):
         return
 
     def checkMagnetism(self, node):
-        """Checks if phase is being added to a magnetic fit, and adds a magStructure if so."""
+        """Checks if phase is being added to a magnetic fit, and creates a magStructure if so."""
         dataobject = self.treeCtrlMain.GetControlData(node)
         stru = dataobject.initial
         fit = self.treeCtrlMain.GetControlData(self.entryfit)
