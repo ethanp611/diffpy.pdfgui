@@ -42,6 +42,7 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
 
         self.enableMag = wx.CheckBox(self, wx.ID_ANY, "Enable Magnetic PDF")
         grid_sizer_2.Add(self.enableMag, 0, wx.ALIGN_CENTER | wx.LEFT, 4)
+        sizer_2.Add(grid_sizer_2, 1, wx.EXPAND, 0)
 
         self.mpdfType = wx.RadioBox(self, wx.ID_ANY, "Magnetic Fitting Type", choices=["Normalized", "Unnormalized"], majorDimension=1, style=wx.RA_SPECIFY_COLS)
         self.mpdfType.SetSelection(0)

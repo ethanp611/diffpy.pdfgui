@@ -78,6 +78,7 @@ class FitStructure(PDFStructure):
         self.initial.pdffit['sgoffset'] = [0.0, 0.0, 0.0]
         self.custom_spacegroup = None
         self.isNormalized = True
+        self.mPDFStruc = None
         return
 
 
@@ -147,7 +148,7 @@ class FitStructure(PDFStructure):
         if name == "initial":
             value = self
         else:
-            emsg = "A instance has no attribute '%s'" % name
+            emsg = "An instance has no attribute '%s'" % name
             raise AttributeError(emsg)
         return value
 
@@ -187,10 +188,10 @@ class FitStructure(PDFStructure):
         for var, con in self.constraints.items():
             con.guess(self.initial.getvar(var))
             for pidx, pguess in con.parguess.items():
-                # skip if already found
+                    # skip if already found
                 if pidx in foundpars:
                     continue
-                # insert to foundpars otherwise
+                    # insert to foundpars otherwise
                 if pguess is not None:
                     foundpars[pidx] = Parameter(pidx, initial=pguess)
                 else:

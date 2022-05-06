@@ -28,6 +28,7 @@ from diffpy.pdfgui.gui.wxextensions.autowidthlabelsgrid import \
 from diffpy.pdfgui.gui.wxextensions.textctrlutils import textCtrlAsGridCell
 from diffpy.pdfgui.gui.sgconstraindialog import SGConstrainDialog
 from diffpy.pdfgui.gui import phasepanelutils
+from diffpy.pdfgui.gui import magpanelutils
 #from diffpy.pdfgui.gui.advancedmagconstraints import AdvancedFrame
 from diffpy.pdfgui.gui.wxextensions import wx12
 from diffpy.utils.wx import gridutils
@@ -36,8 +37,9 @@ from diffpy.pdfgui.gui.phasepanelutils import float2str
 import numpy as np
 import re
 
-class MagConstraintsPanel(wx.Panel):
+class MagConstraintsPanel(wx.Panel, PDFPanel):
     def __init__(self, *args, **kwds):
+        PDFPanel.__init__(self)
         # begin wxGlade: MagConstraintsPanel.__init__
         kwds["style"] = kwds.get("style", 0) | wx.TAB_TRAVERSAL
         wx.Panel.__init__(self, *args, **kwds)
@@ -139,31 +141,32 @@ class MagConstraintsPanel(wx.Panel):
         self.structure = None
         self.constraints = {}
         self.results = None
-        self._textctrls = []
+        self._textctrls = ['textCtrlCorrLength', 'textCtrlOrdScale', 'textCtrlParaScale']
         self._row = 0
         self._col = 0
         self._focusedText = None
         self._selectedCells = []
         # bind onSetFocus onKillFocus events to text controls
-        '''
+
         for widget in self._textctrls:
             self.__dict__[widget].Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
             self.__dict__[widget].Bind(wx.EVT_KILL_FOCUS, self.onKillFocus)
             self.__dict__[widget].Bind(wx.EVT_KEY_DOWN, self.onTextCtrlKey)
-        '''
+
 
         # set up grid
         self.lAtomConstraints = [
             'elem','basis vecs','prop. vecs','FF key']
         # pdffit internal naming
-        self.lConstraints = [
-            'lat(1)', 'lat(2)', 'lat(3)', 'lat(4)', 'lat(5)', 'lat(6)',
-            'pscale', 'delta1', 'delta2', 'sratio', 'spdiameter']
-        #textCtrlIds = [getattr(self, n).GetId() for n in self._textctrls]
-        #self._id2varname = dict(zip(textCtrlIds, self.lConstraints))
+        self.lMagConstraints = [
+            'Mlat(1)', 'Mlat(2)', 'Mlat(3)']
+            #'lat(1)', 'lat(2)', 'lat(3)', 'lat(4)', 'lat(5)', 'lat(6)',
+            #'pscale', 'delta1', 'delta2', 'sratio', 'spdiameter']
+        textCtrlIds = [getattr(self, n).GetId() for n in self._textctrls]
+        self._id2varname = dict(zip(textCtrlIds, self.lMagConstraints))
 
         # Define tooltips.
-        #self.setToolTips(tooltips.magpanel)
+        self.setToolTips(tooltips.magpanel)
 
         # NOTE: GridCellAttr is reference counted.
         # Each call of SetX(attr) decreases its reference count.
@@ -208,7 +211,7 @@ class MagConstraintsPanel(wx.Panel):
         if self.structure is None:
             raise ValueError("structure is not defined.")
 
-        #self.refreshTextCtrls()
+        self.refreshTextCtrls()
 
         ### update the grid ###
         nmagatoms = 0
@@ -261,15 +264,15 @@ class MagConstraintsPanel(wx.Panel):
         self.gridAtoms.ForceRefresh()
         return
 
-    '''
+
     def refreshTextCtrls(self):
         """Refreshes the TextCtrls. """
 
-        for widget, var in zip(self._textctrls, self.lConstraints):
+        for widget, var in zip(self._textctrls, self.lMagConstraints):
             wobj = getattr(self, widget)
             if var in self.constraints:
                 s = self.constraints[var].formula
-            else:''
+            else:
                 s = ""
             wobj.SetValue(s)
 
@@ -294,7 +297,7 @@ class MagConstraintsPanel(wx.Panel):
         else:
             self.constraints.pop(var, None)
             return ""
-    '''
+
 
     def applyCellChange(self, i, j, value):
         """Update an atom according to a change in a cell.
@@ -328,9 +331,9 @@ class MagConstraintsPanel(wx.Panel):
 
 
     # TextCtrl Events
-    '''
+
     def onSetFocus(self, event):
-        """Saves a TextCtrl value, to be compared in onKillFocuse later."""
+        """Saves a TextCtrl value, to be compared in onKillFocus later."""
         self._focusedText = event.GetEventObject().GetValue()
         event.Skip()
         return
@@ -349,7 +352,7 @@ class MagConstraintsPanel(wx.Panel):
             self.mainFrame.needsSave()
         self._focusedText = None
         return
-    '''
+
 
     # Grid Events
     def onLabelRightClick(self, event): # wxGlade: PhaseConstraintsPanel.<event_handler>
@@ -522,9 +525,9 @@ class MagConstraintsPanel(wx.Panel):
             menu.Enable(self.spaceGroupID, False);
 
         # Check for copy/paste
-        if not phasepanelutils.canCopySelectedCells(self):
+        if not magpanelutils.canCopySelectedCells(self):
             menu.Enable(self.copyID, False)
-        if not phasepanelutils.canPasteIntoCells(self):
+        if not magpanelutils.canPasteIntoCells(self):
             menu.Enable(self.pasteID, False)
 
         # Popup the menu.  If an item is selected then its handler
@@ -558,17 +561,17 @@ class MagConstraintsPanel(wx.Panel):
     def onPopupSelect(self, event):
         """Limit cell selection to specified atom selection string.
         """
-        phasepanelutils.showSelectAtomsDialog(self)
+        magpanelutils.showSelectAtomsDialog(self)
         return
 
     def onPopupCopy(self, event):
         """Copy selected cells."""
-        phasepanelutils.copySelectedCells(self)
+        magpanelutils.copySelectedCells(self)
         return
 
     def onPopupPaste(self, event):
         """Paste previously copied cells."""
-        phasepanelutils.pasteIntoCells(self)
+        magpanelutils.pasteIntoCells(self)
         return
 
-# end of class PhaseConstraintsPanel
+# end of class MagConstraintsPanel

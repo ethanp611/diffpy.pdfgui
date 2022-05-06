@@ -28,7 +28,8 @@ from diffpy.pdfgui.gui.pdfpanel import PDFPanel
 from diffpy.pdfgui.gui.phaseconfigurepanel import PhaseConfigurePanel
 from diffpy.pdfgui.gui.phaseconstraintspanel import PhaseConstraintsPanel
 from diffpy.pdfgui.gui.phaseresultspanel import PhaseResultsPanel
-
+from diffpy.pdfgui.gui.magconstraintspanel import MagConstraintsPanel
+from diffpy.pdfgui.gui.magconfigurepanel import MagConfigurePanel
 
 
 class PhaseNotebookPanel(wx.Panel, PDFPanel):
@@ -40,11 +41,15 @@ class PhaseNotebookPanel(wx.Panel, PDFPanel):
         self.notebook_phase_pane_Configure   = PhaseConfigurePanel(self.notebook_phase, -1)
         self.notebook_phase_pane_Constraints = PhaseConstraintsPanel(self.notebook_phase, -1)
         self.notebook_phase_pane_Results     = PhaseResultsPanel(self.notebook_phase, -1)
+        self.notebook_phase_pane_MagConstraints = MagConstraintsPanel(self.notebook_phase, -1)
+        self.notebook_phase_pane_MagConfigure = MagConfigurePanel(self.notebook_phase, -1)
         self.notebook_phase_pane_Configure.notebook_phase = self.notebook_phase
 
         self.notebook_phase_pane_Configure.notebook_phase_pane_Configure = self.notebook_phase_pane_Configure
         self.notebook_phase_pane_Configure.notebook_phase_pane_Constraints = self.notebook_phase_pane_Constraints
         self.notebook_phase_pane_Configure.notebook_phase_pane_Results = self.notebook_phase_pane_Results
+        self.notebook_phase_pane_Configure.notebook_phase_pane_MagConstraints = self.notebook_phase_pane_MagConstraints
+        self.notebook_phase_pane_Configure.notebook_phase_pane_MagConfigure = self.notebook_phase_pane_MagConfigure
         self.__set_properties()
         self.__do_layout()
 
@@ -56,6 +61,7 @@ class PhaseNotebookPanel(wx.Panel, PDFPanel):
         self.results       = None
         self.mainFrame     = None
         self.focusedId     = 0
+        self.isMagConstraint = False
 
 
     def __set_properties(self):
@@ -88,8 +94,15 @@ class PhaseNotebookPanel(wx.Panel, PDFPanel):
         # This has to be done here, because this panel does not know who it
         # belongs to until after it is instantiated.
         panel.mainFrame = self.mainFrame
+        if self.notebook_phase_pane_Configure.isMagnetism() is True and self.isMagConstraint is False:
+            self.notebook_phase.InsertPage(2, self.notebook_phase_pane_MagConstraints, "MagConstraints")
+            self.notebook_phase.InsertPage(1, self.notebook_phase_pane_MagConfigure, "MagConfigure")
+            self.isMagConstraint = True
+        if self.notebook_phase_pane_Configure.isMagnetism() is False and self.isMagConstraint is True:
+            self.isMagConstraint = False
         panel.refresh()
         return
+
 
     def onNotebookPageChanging(self, event):
         """Called during the page selection change."""
@@ -111,6 +124,8 @@ class PhaseNotebookPanel(wx.Panel, PDFPanel):
         self.notebook_phase_pane_Configure.Enable(enable)
         self.notebook_phase_pane_Constraints.Enable(enable)
         self.notebook_phase_pane_Results.Enable(enable)
+        self.notebook_phase_pane_MagConstraints.Enable(enable)
+        self.notebook_phase_pane_MagConfigure.Enable(enable)
         return
 
 
