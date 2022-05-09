@@ -281,9 +281,9 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
                     self.structure.magnetic_atoms = [0]*len(self.structure)
                     for i in range(len(self.structure.magnetic_atoms)):
                         self.structure.magnetic_atoms[i] = [0, ""]
-            """magConf = MagConfigurePanel(self.notebook_phase)
-            magConf.addPhaseGridRef(self.gridAtoms)
-            magConst = MagConstraintsPanel(self.notebook_phase)
+            #magConf = MagConfigurePanel(self.notebook_phase)
+            #magConf.addPhaseGridRef(self.gridAtoms)
+            """magConst = MagConstraintsPanel(self.notebook_phase)
             self.notebook_phase.InsertPage(
                 1, magConf, text="Magnetic Configure")
             self.notebook_phase.InsertPage(

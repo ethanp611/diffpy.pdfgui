@@ -90,10 +90,13 @@ class PhaseNotebookPanel(wx.Panel, PDFPanel):
         panel.structure = self.configuration
         panel.constraints = self.constraints
         panel.results = self.results
+        magConf = self.notebook_phase_pane_MagConfigure
+        magConf.addPhaseGridRef(self.notebook_phase_pane_Configure.gridAtoms)
 
         # This has to be done here, because this panel does not know who it
         # belongs to until after it is instantiated.
         panel.mainFrame = self.mainFrame
+        
         if self.notebook_phase_pane_Configure.isMagnetism() is True and self.isMagConstraint is False:
             self.notebook_phase.InsertPage(2, self.notebook_phase_pane_MagConstraints, "MagConstraints")
             self.notebook_phase.InsertPage(1, self.notebook_phase_pane_MagConfigure, "MagConfigure")
