@@ -62,13 +62,13 @@ class MagConfigurePanel(wx.Panel):
         label_1 = wx.StaticText(self, wx.ID_ANY, "ord. scale")
         grid_sizer_3.Add(label_1, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
-        self.textCtrlOrdScale = wx.TextCtrl(self, wx.ID_ANY, "0.0", style=wx.TE_PROCESS_ENTER)
+        self.textCtrlOrdScale = wx.TextCtrl(self, wx.ID_ANY, "1.0", style=wx.TE_PROCESS_ENTER)
         grid_sizer_3.Add(self.textCtrlOrdScale, 0, wx.ALIGN_CENTER | wx.BOTTOM | wx.TOP, 5)
 
         labelParaScale = wx.StaticText(self, wx.ID_ANY, "para. scale")
         grid_sizer_3.Add(labelParaScale, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
-        self.textCtrlParaScale = wx.TextCtrl(self, wx.ID_ANY, "0.0", style=wx.TE_PROCESS_ENTER)
+        self.textCtrlParaScale = wx.TextCtrl(self, wx.ID_ANY, "1.0", style=wx.TE_PROCESS_ENTER)
         grid_sizer_3.Add(self.textCtrlParaScale, 0, wx.ALIGN_CENTER | wx.BOTTOM | wx.TOP, 5)
 
         sizer_3 = wx.BoxSizer(wx.HORIZONTAL)
@@ -101,7 +101,7 @@ class MagConfigurePanel(wx.Panel):
         self.gridAtoms.CreateGrid(0, 4)
         self.gridAtoms.EnableDragRowSize(0)
         self.gridAtoms.SetColLabelValue(0, "elem")
-        self.gridAtoms.SetColLabelValue(1, "basic vecs")
+        self.gridAtoms.SetColLabelValue(1, "basis vecs")
         self.gridAtoms.SetColLabelValue(2, "prop. vecs")
         self.gridAtoms.SetColLabelValue(3, "FF key")
         sizerAtoms.Add(self.gridAtoms, 1, wx.EXPAND, 0)
@@ -125,6 +125,9 @@ class MagConfigurePanel(wx.Panel):
         self.Bind(wx.grid.EVT_GRID_CMD_EDITOR_SHOWN, self.onEditorShown, self.gridAtoms)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_CLICK, self.onLabelRightClick, self.gridAtoms)
         self.Bind(wx.EVT_RADIOBOX, self.checkNormalized, self.radio1)
+        self.Bind(wx.EVT_TEXT, self.applyTextCtrlPanel, self.textCtrlCorrLength)
+        self.Bind(wx.EVT_TEXT, self.applyTextCtrlPanel, self.textCtrlOrdScale)
+        self.Bind(wx.EVT_TEXT, self.applyTextCtrlPanel, self.textCtrlParaScale)
         # end wxGlade
         self.magviewOpen = False
         self.__customProperties()
@@ -168,6 +171,8 @@ class MagConfigurePanel(wx.Panel):
             'textCtrlParaScale': 'lat(3)',
         }
 
+        #self.lConstraintsMap = {}
+
         # bind onSetFocus onKillFocus events to text controls
 
         for tname in self.lConstraintsMap:
@@ -208,12 +213,14 @@ class MagConfigurePanel(wx.Panel):
     onTextCtrlKey = textCtrlAsGridCell
 
     def checkNormalized(self, event):
+        """Sets the normalization of the structure."""
         if self.radio1.GetStringSelection() == "Normalized":
             self.structure.magStructure.normalized = True
         elif self.radio1.GetStringSelection() == "Unnormalized":
             self.structure.magStructure.normalized = False
 
     def getNormalized(self):
+        """Gets the normalization of the structure."""
         if self.structure.magStructure.normalized == True:
             self.radio1.SetSelection(0)
         else:
@@ -237,8 +244,13 @@ class MagConfigurePanel(wx.Panel):
 
     def refresh(self):
         """Refreshes widgets on the panel."""
+        if self.structure.magStructure is None:
+            return
         self.getNormalized()
-        magpanelutils.refreshTextCtrls(self)
+        #magpanelutils.refreshTextCtrls(self)
+        self.textCtrlCorrLength.SetValue(str(self.structure.magStructure.corrLength))
+        self.textCtrlOrdScale.SetValue(str(self.structure.mpdffit['ordScale']))
+        self.textCtrlParaScale.SetValue(str(self.structure.mpdffit['paraScale']))
         pairs = self.structure.getSelectedPairs()
         self.textCtrlIncludedPairs.SetValue(pairs)
         magpanelutils.refreshGrid(self)
@@ -299,7 +311,31 @@ class MagConfigurePanel(wx.Panel):
 
         return
 '''
+    def applyTextCtrlPanel(self, event):
+        """Update a structure according to a change in a TextCtrl.
 
+        id      --  textctrl id
+        value   --  new value
+        """
+        if self.structure is None:
+            return
+        textCtrl = event.GetEventObject()
+        id = textCtrl.GetId()
+        try:
+            if id == self.textCtrlCorrLength.GetId():
+                value = float(self.textCtrlCorrLength.GetValue())
+                self.structure.magStructure.corrLength = value
+                self.textCtrlCorrLength.SetValue(value)
+            elif id == self.textCtrlOrdScale.GetId():
+                value = float(self.textCtrlOrdScale.GetValue())
+                self.structure.mpdffit['ordScale'] = value
+            elif id == self.textCtrlParaScale.GetId():
+                value = float(self.textCtrlParaScale.GetValue())
+                self.structure.mpdffit['paraScale'] = value
+            return value
+
+        except:
+            return None
 # self.mpdffit = {"qdamp": 0.0, "ordScale": 1.0, "paraScale": 1.0}
     def applyTextCtrlChange(self, id, value):
         """Update a structure according to a change in a TextCtrl.
@@ -337,14 +373,16 @@ class MagConfigurePanel(wx.Panel):
             text = text.replace("}", ")")
             if text[-1] != ",":
                 text = text + ","
-            if not re.match("^(\(\d*\.?\d+\,\d*\.?\d+\,\d*\.?\d+\),)+$", text):
-                return
+            #if not re.match("^(\(\d*\.?\d+\,\d*\.?\d+\,\d*\.?\d+\),)+$", text):
+                #return
             text = text[:-1]
             ret = []
             crds = text.split('),')  # split coordinates
             for i, crd in enumerate(crds):
                 if crd[0] != '(':  # verify valid coordinate
-                    return
+                    crd = "(" + crd
+                if crd[-1] != ')':
+                    crd = crd + ")"
                 if i == len(crds) - 1:  # remove end parenthesis not removed by split
                     crd = crd[:-1]
                 crd = crd[1:]  # remove start parentheses
@@ -353,7 +391,11 @@ class MagConfigurePanel(wx.Panel):
                     return
                 arr = []
                 for val in crd:
-                    arr.append(float(val))  # add each value to an array
+                    print(val)
+                    if val.replace('.','',1).isdigit() is True:  # checks validity of input
+                        arr.append(float(val))  # add each value to an array
+                    else:
+                        return
                 ret.append(arr)
             return np.array(ret)
 
@@ -477,6 +519,7 @@ class MagConfigurePanel(wx.Panel):
 
     def onKillFocus(self, event):
         """Check value of TextCtrl and update structure if necessary."""
+        """
         if not self.mainFrame:
             return
         textctrl = event.GetEventObject()
@@ -487,6 +530,7 @@ class MagConfigurePanel(wx.Panel):
             self.mainFrame.needsSave()
         self._focusedText = None
         event.Skip()
+        """
         return
 
     def onSelectedPairs(self, event):
@@ -574,13 +618,12 @@ class MagConfigurePanel(wx.Panel):
                 # Get the last valid text from the cell. For the cell that triggered
                 # this method, that is the _focusedText, for other cells it is the
                 # value returned by GetCellValue
-                oldvalue = self._focusedText or self.gridAtoms.GetCellValue(
-                    i, j)
+                oldvalue = self._focusedText or self.gridAtoms.GetCellValue(i, j)
                 self._focusedText = None
                 newvalue = self.applyCellChange(i, j, value)
                 if newvalue is None:
                     newvalue = oldvalue
-                self.gridAtoms.SetCellValue(i, j, str(newvalue))
+                self.gridAtoms.SetCellValue(i, j, newvalue)
 
         gridutils.quickResizeColumns(self.gridAtoms, self._selectedCells)
         return

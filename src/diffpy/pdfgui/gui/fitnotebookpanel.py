@@ -81,43 +81,48 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
         """Set the custom properties."""
         self.fit = None
         self.mainFrame = None
+        #selection = self.treeCtrlMain.GetSelections()[0]
+        #self.fit = self.treeCtrlMain.GetControlData(selection)
+        #self.treeCtrlMain.control.enqueue(self.treeCtrlMain.control.fits)
         return
 
     def checkNormalized(self, event):
+        if len(self.fit.strucs) == 0:
+            return
         if self.mpdfType.GetStringSelection() == "Normalized":
-            for fit in (self.treeCtrlMain.control.fits):
-                for struc in (fit.strucs):
-                    if struc.magStructure != None:
-                        struc.magStructure.normalized = True
+            for struc in (self.fit.strucs):
+                if struc.magStructure != None:
+                    struc.magStructure.normalized = True
         elif self.mpdfType.GetStringSelection() == "Unnormalized":
-            for fit in (self.treeCtrlMain.control.fits):
-                for struc in (fit.strucs):
-                    if struc.magStructure != None:
-                        struc.magStructure.normalized = False
+            for struc in (self.fit.strucs):
+                if struc.magStructure != None:
+                    struc.magStructure.normalized = False
 
     def getNormalized(self):
-        for fit in (self.treeCtrlMain.control.fits):
-            for struc in (fit.strucs):
-                if struc.magStructure != None and struc.magStructure.normalized == True:
-                    self.mpdfType.SetSelection(0)
-                elif struc.magStructure != None and struc.magStructure.normalized == False:
-                    self.mpdfType.SetSelection(1)
+        if len(self.fit.strucs) == 0:
+            return
+        for struc in (self.fit.strucs):
+            if struc.magStructure != None and struc.magStructure.normalized == True:
+                self.mpdfType.SetSelection(0)
+            elif struc.magStructure != None and struc.magStructure.normalized == False:
+                self.mpdfType.SetSelection(1)
 
     def onCheck(self, event):
         """Toggles magnetic PDF in both fitting and phase options"""
         print("Toggling magnetism")
-        for fit in (self.treeCtrlMain.control.fits):
-            fit.magnetism = self.enableMag.GetValue()
-            for struc in (fit.strucs):
-                struc.magnetism = self.enableMag.GetValue()
-                if struc.magStructure == None:
-                    struc.magStructure = MagStructure(struc)
-                    struc.magStructure.corr = 0
-                    struc.magStructure.ord = 0
-                    struc.magStructure.para = 0
-                    struc.magnetic_atoms = [0]*len(struc)
-                    for i in range(len(struc.magnetic_atoms)):
-                        struc.magnetic_atoms[i] = [0,""]
+        if len(self.fit.strucs) == 0:
+            return
+        self.fit.magnetism = self.enableMag.GetValue()
+        for struc in (self.fit.strucs):
+            struc.magnetism = self.enableMag.GetValue()
+            if struc.magStructure == None:
+                struc.magStructure = MagStructure(struc)
+                struc.magStructure.corr = 0
+                struc.magStructure.ord = 0
+                struc.magStructure.para = 0
+                struc.magnetic_atoms = [0]*len(struc)
+                for i in range(len(struc.magnetic_atoms)):
+                    struc.magnetic_atoms[i] = [0,""]
 
         """
         if self.enableMag.GetValue():
@@ -141,13 +146,22 @@ class FitNotebookPanel(wx.Panel, PDFPanel):
     def refresh(self):
         """Refresh the panels."""
         if not self.fit: return
+        selection = self.treeCtrlMain.GetSelections()[0]
+        self.fit = self.treeCtrlMain.GetControlData(selection)
         self.getNormalized()
         panel = self.fitnotebook.GetCurrentPage()
         panel.mainFrame = self.mainFrame
         panel.refresh()
+        #self.treeCtrlMain.control.enqueue(self.treeCtrlMain.control.fits)
+        self.treeCtrlMain.control.checkQueue(run = False)
+        #self.fit = self.treeCtrlMain.control.currentFitting
         panel.fit = self.fit
         panel.parameters = self.fit.parameters
         panel.refresh()
+
+        print("Magnetism")
+        print(self.fit.magnetism)
+        self.enableMag.SetValue(self.fit.magnetism)
 
     # Overloaded from Panel.
     def Enable(self, enable = True):

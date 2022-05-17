@@ -79,6 +79,8 @@ class FitStructure(PDFStructure):
         self.custom_spacegroup = None
         self.isNormalized = True
         self.mPDFStruc = None
+        self.mpdffit = {'ordScale': 1.0, 'paraScale': 1.0}
+
         return
 
 

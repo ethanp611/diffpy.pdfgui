@@ -18,6 +18,7 @@
 
 import copy
 import math
+import numpy as np
 
 from diffpy.pdfgui.control.mpdfcalculator import MPDFcalculator
 from diffpy.pdfgui.control.controlerrors import ControlConfigError
@@ -186,7 +187,7 @@ class Calculation(PDFComponent):
         mc.rmin = self.rmin
         mc.rmax = self.rmax
         mc.rstep = self.rstep
-        mc.scale = self.dscale
+        #mc.scale = self.dscale
 
         # load structure and disable metadata using the nometa function
         # and set any calculator attributes as needed as above
@@ -195,16 +196,23 @@ class Calculation(PDFComponent):
 
         rMag_list = []
         frMag_list = []
+        isMagnetic = False
+        list_size = 0
 
         self.owner.applyParameters()
         for struc in self.owner.strucs:
             # pc is for one calculation. the common setting
             # pc_temp is for each phase, specific setting
             rMag, frMag = 0, 0
-            if struc.magStructure:
+            if struc.magnetism is True and len(struc.magStructure.species) > 0:
+                isMagnetic = True
                 struc.magStructure.makeAll()
                 mc.magstruc = struc.magStructure
+                mc.ordScale = struc.mpdffit['ordScale']
+                mc.paraScale = struc.mpdffit['paraScale']
                 rMag, frMag = mc.calc(normalized=struc.magStructure.normalized)
+                if len(rMag) > list_size:
+                    list_size = len(rMag)
             rMag_list.append(rMag)
             frMag_list.append(frMag)
 
@@ -223,31 +231,45 @@ class Calculation(PDFComponent):
             # pc_temp.setTypeMask("Ni","O",True)
 
             r, g = pc_temp(nometa(struc))
-            if struc.getvar('pscale'):
-                g = g * struc.getvar('pscale')
+            #if struc.getvar('pscale'):
+            g = g * struc.getvar('pscale')
+
             r_list.append(r)
             g_list.append(g)
-        #print("len(r_list)", len(r_list))
-        #print("len(g_list)", len(g_list))
 
         # get results
 
         self.rcalc = r_list[0].tolist()  # r0, r1, r2 are the same, so just use r0
 
-        sizeDifference = len(rMag)-len(self.rcalc)
-        if sizeDifference > 0: # If rMag has a larger size than rcalc, all mag elements are shrunk
+        if isMagnetic is True:
             for i in range(len(rMag_list)):
-                rMag_list[i] = rMag_list[i][:-sizeDifference]
-                frMag_list[i] = frMag_list[i][:-sizeDifference]
-        elif sizeDifference < 0: # If rcalc has a larger size than rMag, all atomic elements are shrunk
-            for i in range (len(r_list)):
-                r_list[i] = r_list[i][:-sizeDifference]
-                g_list[i] = g_list[i][:-sizeDifference]
+                if isinstance(rMag_list[i], int):
+                    rMag_list[i] = np.zeros(list_size)
+                if isinstance(frMag_list[i], int):
+                    frMag_list[i] = np.zeros(list_size)
+        if isinstance(rMag, int):
+            rMag = np.zeros(list_size)
+        if isinstance(frMag, int):
+            frMag = np.zeros(list_size)
+
+        if isMagnetic is True and len(rMag_list) > 0:
+            #print(type(rMag))
+            #print(type(self.rcalc))
+            sizeDifference = len(rMag)-len(self.rcalc)
+            if sizeDifference > 0: # If rMag has a larger size than rcalc, all mag elements are shrunk
+                for i in range(len(rMag_list)):
+                    rMag_list[i] = rMag_list[i][:-sizeDifference]
+                    print(type(frMag_list[i]))
+                    frMag_list[i] = frMag_list[i][:-sizeDifference]
+            elif sizeDifference < 0: # If rcalc has a larger size than rMag, all atomic elements are shrunk
+                for i in range (len(r_list)):
+                    r_list[i] = r_list[i][:-sizeDifference]
+                    g_list[i] = g_list[i][:-sizeDifference]
 
         # sum up multi-phase PDFs
         gsum = 0
         for i in range(len(self.owner.strucs)):
-            gsum += g_list[i] + frMag_list[i]
+            gsum += ((g_list[i] + frMag_list[i]) * self.dscale)
         self.Gcalc = gsum.tolist()
 
         return

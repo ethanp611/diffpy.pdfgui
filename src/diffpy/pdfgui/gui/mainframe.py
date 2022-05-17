@@ -1887,7 +1887,7 @@ class MainFrame(wx.Frame):
         """Stop all fits.
 
         This removes all items from the runningDict and changes the status
-        colors back to wxWHITE.
+        colors back to wxWHITE.'fit
         """
         self.control.stop()
         self.needsSave()
@@ -2500,6 +2500,7 @@ class MainFrame(wx.Frame):
         #long
         # TODO: append CMI result after pdffit result
         if self.control.getCMIOutput():
+            print("update")
             self.outputPanel.updateText(self.control.getCMIOutput())
             self.control.resetCMIOutput() #only output cmi results once
         #end long

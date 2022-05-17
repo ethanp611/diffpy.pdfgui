@@ -19,6 +19,7 @@
 import wx
 from diffpy.pdfgui.gui.fittree import incrementName
 from diffpy.pdfgui.gui.pdfpanel import PDFPanel
+from diffpy.pdfgui.control.magstructure import MagStructure
 
 class AddPhasePanel(wx.Panel, PDFPanel):
     """Panel for adding a phase
@@ -161,6 +162,7 @@ class AddPhasePanel(wx.Panel, PDFPanel):
 
             newnode = self.treeCtrlMain.AddPhase(self.entryfit, name,
                     insertafter=self.entryphase, filename=self.fullpath)
+            self.checkMagnetism(newnode)
 
             self.mainFrame.setMode("fitting")
             self.treeCtrlMain.SetItemBold(self.entrypoint, False)
@@ -169,6 +171,23 @@ class AddPhasePanel(wx.Panel, PDFPanel):
             self.validateStructure(newnode)
         d.Destroy()
         return
+
+    def checkMagnetism(self, node):
+        """Checks if phase is being added to a magnetic fit, and creates a magStructure if so."""
+        dataobject = self.treeCtrlMain.GetControlData(node)
+        stru = dataobject.initial
+        fit = self.treeCtrlMain.GetControlData(self.entryfit)
+        if fit.magnetism:
+            print(type(stru))
+            stru.magnetism = True
+            if stru.magStructure == None:
+                stru.magStructure = MagStructure(stru)
+                stru.magStructure.corr = 0
+                stru.magStructure.ord = 0
+                stru.magStructure.para = 0
+                stru.magnetic_atoms = [0]*len(stru)
+                for i in range(len(stru.magnetic_atoms)):
+                    stru.magnetic_atoms[i] = [0,""]
 
     def onNew(self, event): # wxGlade: AddPhasePanel.<event_handler>
         """Add a new item to be created from scratch."""

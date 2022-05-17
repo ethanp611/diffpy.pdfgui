@@ -452,8 +452,8 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
                 if value == 1 and self.structure.magnetic_atoms[i][1] == "":
                     # if not a magSpecies (name = "" or not in dict), create and insert
                     label = self.randValidKey()
-                    msp = MagSpecies(self.structure, strucIdxs=[i], label=label, rmaxAtoms=10, basisvecs=np.array([0,0,1]),
-                                    kvecs=np.array([0,0,0]))
+                    msp = MagSpecies(self.structure, strucIdxs=[i], label=label, rmaxAtoms=10, basisvecs=np.array([(0,0,1)]),
+                                    kvecs=np.array([(0,0,0)]))
                     self.structure.magStructure.loadSpecies(msp)
                     #self.structure.magStructure.makeAll()
                     #self.structure.magStructure.makeSpecies(label=label)
@@ -463,15 +463,14 @@ class PhaseConfigurePanel(wx.Panel, PDFPanel):
                     #self.structure.magStructure.magSpecies[label].makeSpins()
                     self.structure.magnetic_atoms[i] = [value,label]
                     print("magStructure", self.structure.magStructure)
-                    print(self.structure.magStructure.species)
+                    print(len(self.structure.magStructure.species))
 
                 elif value == 0:
                     # is val a magSpecies? if so, remove
                     if self.structure.magStructure and self.structure.magnetic_atoms[i][1] in self.structure.magStructure.species:
                         self.structure.magStructure.removeSpecies(label=self.structure.magnetic_atoms[i][1])
                         self.structure.magnetic_atoms[i] = [value,""]
-                        print(len(self.structure.magStructure.atoms))
-                        print(len(self.structure.magStructure.spins))
+                        print(len(self.structure.magStructure.species))
             self.mainFrame.needsSave()
             return value
 

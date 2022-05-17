@@ -347,6 +347,7 @@ class Fitting(Organizer):
 
     def configure(self):
         """configure fitting"""
+        print("config")
         if self.fitStatus != Fitting.CONNECTED:
             return
 
