@@ -115,6 +115,7 @@ class Constraint:
         """
         if name != "formula":
             self.__dict__[name] = value
+            #print(self.__dict__[name])
             return
         # here we are assigning to formula
         # first we need to check it it is valid

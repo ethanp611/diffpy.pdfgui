@@ -166,6 +166,97 @@ class PDFStructure(PDFComponent, PDFFitStructure):
             value = self.lattice.beta
         elif barevar == 'lat(6)':
             value = self.lattice.gamma
+        elif barevar == 'Mlat(1)' or 'Mlat(2)' or 'Mlat(3)':
+            return self.maggetvar(var)
+        elif parenthesis:
+            pvar = parenthesis.group(1)
+            idx = int(parenthesis.group(2))
+            atom = self[idx-1]
+            if pvar == "x":
+                value = atom.xyz[0]
+            elif pvar == "y":
+                value = atom.xyz[1]
+            elif pvar == "z":
+                value = atom.xyz[2]
+            elif pvar == "occ":
+                value = atom.occupancy
+            elif pvar in ("u11", "u22", "u33", "u12", "u13", "u23"):
+                i, j = int(pvar[1]) - 1,  int(pvar[2]) - 1
+                value = atom.U[i,j]
+            else:
+                raise ControlKeyError(emsg)
+        else:
+            raise ControlKeyError(emsg)
+        # all should be fine here, but value may be NumPy.float64scalar type
+        value = float(value)
+        return value
+
+    def magsetvar(self, var, value):
+        """assign to data member using PdfFit-style variable
+        This can be used when applying constraint equations with particular
+        parameter values.
+
+        var   -- string representation of PdfFit variable.  Possible values:
+                 pscale, spdiameter, stepcut, delta1, delta2, sratio, rcut,
+                 lat(n), where n=1..6,  x(i), y(i), z(i), occ(i), u11(i),
+                 u22(i), u33(i), u12(i), u13(i), u23(i), where i=1..Natoms
+        value -- new value of the variable
+        """
+        barevar = var.strip()
+        fvalue = float(value)
+        parenthesis = re.match(r'^(\w+)\((\d+)\)$', barevar)
+        # common error message
+        emsg = "Invalid PdfFit phase variable %r" % barevar
+        if barevar == 'Mlat(1)':
+            self.lattice.setLatPar(a=fvalue)
+        elif barevar == 'Mlat(2)':
+            self.lattice.setLatPar(b=fvalue)
+        elif barevar == 'Mlat(3)':
+            self.lattice.setLatPar(c=fvalue)
+        elif parenthesis:
+            pvar = parenthesis.group(1)
+            idx = int(parenthesis.group(2))
+            atom = self[idx-1]
+            if pvar == "x":
+                atom.xyz[0] = fvalue
+            elif pvar == "y":
+                atom.xyz[1] = fvalue
+            elif pvar == "z":
+                atom.xyz[2] = fvalue
+            elif pvar == "occ":
+                atom.occupancy = fvalue
+            elif pvar in ("u11", "u22", "u33", "u12", "u13", "u23"):
+                i, j = int(pvar[1]) - 1,  int(pvar[2]) - 1
+                atom.U[i,j], atom.U[j,i] = fvalue, fvalue
+            else:
+                raise ControlKeyError(emsg)
+        else:
+            raise ControlKeyError(emsg)
+        return
+
+
+    def maggetvar(self, var):
+        """obtain value corresponding to PdfFit phase variable var
+        This can be used when guessing Parameter values from constraints
+        dictionary.
+
+        var   -- string representation of PdfFit variable.  Possible values:
+                 pscale, spdiameter, stepcut, delta1, delta2, sratio, rcut,
+                 lat(n), where n = 1..6,  x(i), y(i), z(i), occ(i), u11(i),
+                 u22(i), u33(i), u12(i), u13(i), u23(i), where i=1..Natoms
+
+        returns value of var
+        """
+        barevar = var.strip()
+        parenthesis = re.match(r'^(\w+)\((\d+)\)$', barevar)
+        # common error message
+        emsg = "Invalid PdfFit phase variable %r" % barevar
+        if barevar == 'Mlat(1)':
+            value = self.lattice.a
+        elif barevar == 'Mlat(2)':
+            value = self.lattice.b
+        elif barevar == 'Mlat(3)':
+            value = self.lattice.c
         elif parenthesis:
             pvar = parenthesis.group(1)
             idx = int(parenthesis.group(2))
