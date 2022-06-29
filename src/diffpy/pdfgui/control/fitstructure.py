@@ -627,6 +627,7 @@ class FitStructure(PDFStructure):
         idx = 0
         for iflag, jflag in zip(psf['firstflags'], psf['secondflags']):
             idx += 1
+            print("           here it is now")
             server.selectAtomIndex(phaseidx, 'i', idx, iflag)
             server.selectAtomIndex(phaseidx, 'j', idx, jflag)
         return

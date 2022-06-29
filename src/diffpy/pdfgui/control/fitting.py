@@ -17,12 +17,14 @@ from __future__ import print_function
 
 import threading
 import time
+import numpy as np
 
 from diffpy.pdfgui.control.organizer import Organizer
 from diffpy.pdfgui.control.controlerrors import ControlError
 from diffpy.pdfgui.control.controlerrors import ControlStatusError
 from diffpy.pdfgui.control.controlerrors import ControlValueError
 from diffpy.pdfgui.utils import safeCPickleDumps, pickle_loads
+from diffpy.pdfgui.control.mpdfcalculator import MPDFcalculator
 
 from diffpy.srfit.pdf import PDFContribution
 from diffpy.srfit.fitbase import Profile
@@ -98,13 +100,16 @@ class Fitting(Organizer):
             fitting -- fitting object
             """
             threading.Thread.__init__(self)
+            print("              init")
             self.fitting = fitting
 
         def run(self):
             """overload function from Thread """
             try:
                 self.fitting.run()
+                print("              ran")
             except ControlError as error:
+                print("              error")
                 gui = self.fitting.controlCenter.gui
                 if gui:
                     gui.postEvent(gui.ERROR, "<Fitting exception> %s" % error.info)
@@ -344,10 +349,26 @@ class Fitting(Organizer):
 
         self.__changeStatus(fitStatus=Fitting.CONNECTED)
 
+    def mpdfOld(self, struc):
+        print("TYPE")
+        print(type(struc))
+        print(struc)
+        ordScale = struc.mpdffit['ordScale']
+        paraScale = struc.mpdffit['paraScale']
+        print("PASSED")
+        rmin = self.datasets[0].fitrmin
+        rmax = self.datasets[0].fitrmax
+        qdamp = self.datasets[0].qdamp
+        print(struc.magStructure)
+        mc = MPDFcalculator(magstruc = struc.magStructure, qdamp = qdamp, rmax = rmax, rmin = rmin)
+        r, fr, dcalc = mc.calc(both=True)
+        return dcalc
 
     def configure(self):
         """configure fitting"""
         print("config")
+        print("type")
+        print(type(self.strucs[0]))
         if self.fitStatus != Fitting.CONNECTED:
             return
 
@@ -372,9 +393,28 @@ class Fitting(Organizer):
 
         self.cmicontribution = FitContribution("cmicontribution")
         self.cmicontribution.addProfileGenerator(self.cmipdfgen)
+        #self.cmicontribution.addProfileGenerator()
         self.cmicontribution.setProfile(self.cmiprofile, xname ="r")
         #(scale * cmipdfgen) + (magScale * mpdfcalc?)
-        self.cmicontribution.setEquation("scale * cmipdfgen")
+
+        def mpdf():
+            print("mpdf done")
+            print("TYPE")
+            struc = self.strucs[0]
+            ordScale = struc.mpdffit['ordScale']
+            paraScale = struc.mpdffit['paraScale']
+            rmin = self.datasets[0].fitrmin
+            rmax = self.datasets[0].fitrmax
+            qdamp = self.datasets[0].qdamp
+            mc = MPDFcalculator(magstruc = struc.magStructure, qdamp = qdamp, rmax = rmax, rmin = rmin)
+            r, fr, dcalc = mc.calc(both=True)
+            return dcalc
+
+        struc = self.strucs[0]
+        self.cmicontribution.registerFunction(mpdf)
+        #self.cmicontribution.setEquation("scale * cmipdfgen")
+        #dr = self.mpdf(struc)
+        self.cmicontribution.setEquation("scale * cmipdfgen + mpdf") # + mpdfcalculation
 
         # add qmax, qdamp, qbroad into cmipdfgen
         self.cmipdfgen.setQmax(self.datasets[0].qmax)
@@ -415,11 +455,13 @@ class Fitting(Organizer):
             #
             # Pair selection applies only to the current dataset,
             # therefore it has to be done here.
+            """
             nstrucs = len(self.strucs)
             for phaseidx, struc in zip(range(1, nstrucs + 1), self.strucs):
                 struc.applyPairSelection(self.server, phaseidx)
+            """
 
-
+        print("                   end")
         # turn on printout fithook in each refinement step
         self.cmirecipe.fithooks[0].verbose = 3
 
@@ -979,9 +1021,9 @@ class Fitting(Organizer):
             self.cmirecipe.constrain(atoms[key_arg - 1].occupancy, var_name)
 
         # data parameters
-        if key_ascii_ref == 'qdamp':
+        if key_ref == 'qdamp':
             self.cmirecipe.constrain(self.cmipdfgen.qdamp, var_name)
-        if key_ascii_ref == 'qbroad':
+        if key_ref == 'qbroad':
             self.cmirecipe.constrain(self.cmipdfgen.qbroad, var_name)
         # TODO how to deal with `dscale`. cmipdfgen don't have `dscale` parameter.
 

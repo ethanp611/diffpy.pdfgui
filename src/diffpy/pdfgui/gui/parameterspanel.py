@@ -401,6 +401,7 @@ class ParametersPanel(wx.Panel, PDFPanel):
     ##### end of Popup menu events  ###########################################
 
     def onApplyParameters(self, event): # wxGlade: ParametersPanel.<event_handler>
+        print("parameters applied")
         self.fit.applyParameters()
         self.mainFrame.needsSave()
         event.Skip()
