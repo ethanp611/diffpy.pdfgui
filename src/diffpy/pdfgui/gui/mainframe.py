@@ -786,7 +786,6 @@ class MainFrame(wx.Frame):
 
         if paneltype is None:
             paneltype = "blank"
-
         self.rightPanel = self.dynamicPanels[paneltype]
         self.rightPanel.Enable(True)
         self.setPanelSpecificData(paneltype)
