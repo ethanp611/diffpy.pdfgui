@@ -349,21 +349,6 @@ class Fitting(Organizer):
 
         self.__changeStatus(fitStatus=Fitting.CONNECTED)
 
-    def mpdfOld(self, struc):
-        print("TYPE")
-        print(type(struc))
-        print(struc)
-        ordScale = struc.mpdffit['ordScale']
-        paraScale = struc.mpdffit['paraScale']
-        print("PASSED")
-        rmin = self.datasets[0].fitrmin
-        rmax = self.datasets[0].fitrmax
-        qdamp = self.datasets[0].qdamp
-        print(struc.magStructure)
-        mc = MPDFcalculator(magstruc = struc.magStructure, qdamp = qdamp, rmax = rmax, rmin = rmin)
-        r, fr, dcalc = mc.calc(both=True)
-        return dcalc
-
     def configure(self):
         """configure fitting"""
         print("config")
@@ -391,7 +376,7 @@ class Fitting(Organizer):
                                             xmax = self.datasets[0].fitrmax,
                                             dx = self.datasets[0].fitrstep)
 
-        self.cmicontribution = FitContribution("cmicontribution")
+        self.cmicontribution = FitContribution('cmicontribution')
         self.cmicontribution.addProfileGenerator(self.cmipdfgen)
         #self.cmicontribution.addProfileGenerator()
         self.cmicontribution.setProfile(self.cmiprofile, xname ="r")
@@ -406,15 +391,24 @@ class Fitting(Organizer):
             rmin = self.datasets[0].fitrmin
             rmax = self.datasets[0].fitrmax
             qdamp = self.datasets[0].qdamp
+            print("magStruc: ", struc.magStructure)
+            print("qdamp: ", qdamp)
+            print("rmax: ", rmax)
+            print("rmin: ", rmin)
             mc = MPDFcalculator(magstruc = struc.magStructure, qdamp = qdamp, rmax = rmax, rmin = rmin)
+            mc.ordScale = ordScale
+            mc.paraScale = paraScale
             r, fr, dcalc = mc.calc(both=True)
+            print("dcalc: ", dcalc)
             return dcalc
 
         struc = self.strucs[0]
         self.cmicontribution.registerFunction(mpdf)
         #self.cmicontribution.setEquation("scale * cmipdfgen")
         #dr = self.mpdf(struc)
-        self.cmicontribution.setEquation("scale * cmipdfgen + mpdf") # + mpdfcalculation
+        self.cmicontribution.setEquation("scale * cmipdfgen + mpdf()") # + mpdfcalculation
+
+        #self.cmipdfgen.phase.addObserver(self.cmicontribution.ordscale.Notify)
 
         # add qmax, qdamp, qbroad into cmipdfgen
         self.cmipdfgen.setQmax(self.datasets[0].qmax)
